@@ -30,9 +30,252 @@ HOW TO UPDATE?
   and API updates have been a little more frequent lately. They are documented below and in imgui.cpp and should not affect all users.
 - Please report any issue!
 
+
+-----------------------------------------------------------------------
+ VERSION 1.87 (Released 2022-02-07)
+-----------------------------------------------------------------------
+
+Decorated log: https://github.com/ocornut/imgui/releases/tag/v1.87
+
+Breaking Changes:
+
+- Removed support for pre-C++11 compilers. We'll stop supporting VS2010. (#4537)
+- Reworked IO mouse input API: (#4921, #4858) [@thedmd, @ocornut]
+  - Added io.AddMousePosEvent(), io.AddMouseButtonEvent(), io.AddMouseWheelEvent() functions,
+    obsoleting writing directly to io.MousePos, io.MouseDown[], io.MouseWheel, etc.
+  - This enable input queue trickling to support low framerates. (#2787, #1992, #3383, #2525, #1320)
+- Reworked IO keyboard input API: (#4921, #2625, #3724) [@thedmd, @ocornut]
+  - Added io.AddKeyEvent() function, obsoleting writing directly to io.KeyMap[], io.KeysDown[] arrays.
+  - For keyboard modifiers, you can call io.AddKeyEvent() with ImGuiKey_ModXXX values,
+    obsoleting writing directly to io.KeyCtrl, io.KeyShift etc.
+  - Added io.SetKeyEventNativeData() function (optional) to pass native and old legacy indices.
+  - Added full range of key enums in ImGuiKey (e.g. ImGuiKey_F1).
+  - Added GetKeyName() helper function.
+  - Obsoleted GetKeyIndex(): it is now unnecessary and will now return the same value.
+  - All keyboard related functions taking 'int user_key_index' now take 'ImGuiKey key':
+    - IsKeyDown(), IsKeyPressed(), IsKeyReleased(), GetKeyPressedAmount().
+  - Added io.ConfigInputTrickleEventQueue (defaulting to true) to disable input queue trickling.
+  - Backward compatibility:
+    - All backends updated to use new functions.
+    - Old backends populating those arrays should still work!
+    - Calling e.g. IsKeyPressed(MY_NATIVE_KEY_XXX) will still work! (for a while)
+    - Those legacy arrays will only be disabled if '#define IMGUI_DISABLE_OBSOLETE_KEYIO' is set in your imconfig.
+      In a few versions, IMGUI_DISABLE_OBSOLETE_FUNCTIONS will automatically enable IMGUI_DISABLE_OBSOLETE_KEYIO,
+      so this will be moved into the regular obsolescence path.
+    - BREAKING: If your custom backend used ImGuiKey as mock native indices (e.g. "io.KeyMap[ImGuiKey_A] = ImGuiKey_A")
+      this is a use case that will now assert and be breaking for your old backend.
+  - Transition guide:
+     - IsKeyPressed(MY_NATIVE_KEY_XXX)           -> use IsKeyPressed(ImGuiKey_XXX)
+     - IsKeyPressed(GetKeyIndex(ImGuiKey_XXX))   -> use IsKeyPressed(ImGuiKey_XXX)
+     - Backend writing to io.KeyMap[],KeysDown[] -> backend should call io.AddKeyEvent(), if legacy indexing is desired, call io.SetKeyEventNativeData()
+     - Basically the trick we took advantage of is that we previously only supported native keycode from 0 to 511,
+       so ImGuiKey values can still express a legacy native keycode, and new named keys are all >= 512.
+  - This will enable a few things in the future:
+     - Access to portable keys allows for backend-agnostic keyboard input code. Until now it was difficult
+       to share code using keyboard across project because of this gap. (#2625, #3724)
+     - Access to full key ranges will allow us to develop a proper keyboard shortcut system. (#456)
+     - io.SetKeyEventNativeData() include native keycode/scancode which may later be exposed. (#3141, #2959)
+- Reworked IO nav/gamepad input API and unifying inputs sources: (#4921, #4858, #787)
+  - Added full range of ImGuiKey_GamepadXXXX enums (e.g. ImGuiKey_GamepadDpadUp, ImGuiKey_GamepadR2) to use with
+    io.AddKeyEvent(), io.AddKeyAnalogEvent().
+  - Added io.AddKeyAnalogEvent() function, obsoleting writing directly to io.NavInputs[] arrays.
+- Renamed ImGuiKey_KeyPadEnter to ImGuiKey_KeypadEnter to align with new symbols. Kept redirection enum. (#2625)
+- Removed support for legacy arithmetic operators (+,+-,*,/) when inputing text into a slider/drag. (#4917, #3184)
+  This doesn't break any api/code but a feature that was accessible by end-users (which seemingly no one used).
+  (Instead you may implement custom expression evaluators to provide a better version of this).
+- Backends: GLFW: backend now uses glfwSetCursorPosCallback().
+  - If calling ImGui_ImplGlfw_InitXXX with install_callbacks=true: nothing to do. is already done for you.
+  - If calling ImGui_ImplGlfw_InitXXX with install_callbacks=false: you WILL NEED to register the GLFW callback
+    using glfwSetCursorPosCallback() and forward it to the backend function ImGui_ImplGlfw_CursorPosCallback().
+- Backends: SDL: Added SDL_Renderer* parameter to ImGui_ImplSDL2_InitForSDLRenderer(), so backend can call
+  SDL_GetRendererOutputSize() to obtain framebuffer size valid for hi-dpi. (#4927) [@Clownacy]
+- Commented out redirecting functions/enums names that were marked obsolete in 1.69, 1.70, 1.71, 1.72 (March-July 2019)
+  - ImGui::SetNextTreeNodeOpen()        -> use ImGui::SetNextItemOpen()
+  - ImGui::GetContentRegionAvailWidth() -> use ImGui::GetContentRegionAvail().x
+  - ImGui::TreeAdvanceToLabelPos()      -> use ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetTreeNodeToLabelSpacing());
+  - ImFontAtlas::CustomRect             -> use ImFontAtlasCustomRect
+  - ImGuiColorEditFlags_RGB/HSV/HEX     -> use ImGuiColorEditFlags_DisplayRGB/HSV/Hex
+- Removed io.ImeSetInputScreenPosFn() in favor of more flexible io.SetPlatformImeDataFn() for IME support.
+  Because this field was mostly only ever used by Dear ImGui internally, not by backends nor the vast majority
+  of user code, this should only affect a very small fraction for users who are already very IME-aware.
+- Obsoleted 'void* io.ImeWindowHandle' in favor of writing to 'void* ImGuiViewport::PlatformHandleRaw'.
+  This removes an incompatibility between 'master' and 'multi-viewports' backends and toward enabling
+  better support for IME. Updated backends accordingly. Because the old field is set by existing backends,
+  we are keeping it (marked as obsolete).
+
+
+Other Changes:
+
+- IO: Added event based input queue API, which now trickles events to support low framerates. [@thedmd, @ocornut]
+  Previously the most common issue case (button presses in low framerates) was handled by backend. This is now
+  handled by core automatically for all kind of inputs. (#4858, #2787, #1992, #3383, #2525, #1320)
+  - New IO functions for keyboard/gamepad: AddKeyEvent(), AddKeyAnalogEvent().
+  - New IO functions for mouse: AddMousePosEvent(), AddMouseButtonEvent(), AddMouseWheelEvent().
+- IO: Unified key enums allow using key functions on key mods and gamepad values.
+- Fixed CTRL+Tab into an empty window causing artifacts on the highlight rectangle due to bad reordering on ImDrawCmd.
+- Fixed a situation where CTRL+Tab or Modal can occasionally lead to the creation of ImDrawCmd with zero triangles,
+  which would makes the draw operation of some backends assert (e.g. Metal with debugging). (#4857)
+- Popups: Fixed a regression crash when a new window is created after a modal on the same frame. (#4920) [@rokups]
+- Popups: Fixed an issue when reopening a same popup multiple times would offset them by 1 pixel on the right. (#4936)
+- Tables, ImDrawListSplitter: Fixed erroneously stripping trailing ImDrawList::AddCallback() when submitted in
+  last column or last channel and when there are no other drawing operation. (#4843, #4844) [@hoffstadt]
+- Tables: Fixed positioning of Sort icon on right-most column with some settings (not resizable + no borders). (#4918).
+- Nav: Fixed gamepad navigation in wrapping popups not wrapping all the way. (#4365)
+- Sliders, Drags: Fixed text input of values with a leading sign, common when using a format enforcing sign. (#4917)
+- Demo: draw a section of keyboard in "Inputs > Keyboard, Gamepad & Navigation state" to visualize keys. [@thedmd]
+- Platform IME: changed io.ImeSetInputScreenPosFn() to io.SetPlatformImeDataFn() API,
+  now taking a ImGuiPlatformImeData structure which we can more easily extend in the future.
+- Platform IME: moved io.ImeWindowHandle to GetMainViewport()->PlatformHandleRaw.
+- Platform IME: add ImGuiPlatformImeData::WantVisible, hide IME composition window when not used. (#2589) [@actboy168]
+- Platform IME: add ImGuiPlatformImeData::InputLineHeight. (#3113) [@liuliu]
+- Platform IME: [windows] call ImmSetCandidateWindow() to position candidate window.
+- Backends: GLFW: Pass localized keys (matching keyboard layout). Fix e.g. CTRL+A, CTRL+Z, CTRL+Y shortcuts.
+  We are now converting GLFW untranslated keycodes back to translated keycodes in order to match the behavior of
+  other backend, and facilitate the use of GLFW with lettered-shortcuts API. (#456, #2625)
+- Backends: GLFW: Submit keys and key mods using io.AddKeyEvent(). (#2625, #4921)
+- Backends: GLFW: Submit mouse data using io.AddMousePosEvent(), io.AddMouseButtonEvent(), io.AddMouseWheelEvent() functions. (#4921)
+- Backends: GLFW: Retrieve mouse position using glfwSetCursorPosCallback() + fallback when focused but not hovered/captured.
+- Backends: GLFW: Submit gamepad data using io.AddKeyEvent/AddKeyAnalogEvent() functions, stopped writing to io.NavInputs[]. (#4921)
+- Backends: GLFW: Added ImGui_ImplGlfw_InstallCallbacks()/ImGui_ImplGlfw_RestoreCallbacks() helpers to facilitate user installing
+  callbacks after iniitializing backend. (#4981)
+- Backends: Win32: Submit keys and key mods using io.AddKeyEvent(). (#2625, #4921)
+- Backends: Win32: Retrieve mouse position using WM_MOUSEMOVE/WM_MOUSELEAVE + fallback when focused but not hovered/captured.
+- Backends: Win32: Submit mouse data using io.AddMousePosEvent(), AddMouseButtonEvent(), AddMouseWheelEvent() functions. (#4921)
+- Backends: Win32: Maintain a MouseButtonsDown mask instead of using ImGui::IsAnyMouseDown() which will be obsoleted.
+- Backends: Win32: Submit gamepad data using io.AddKeyEvent/AddKeyAnalogEvent() functions, stopped writing to io.NavInputs[]. (#4921)
+- Backends: SDL: Pass localized keys (matching keyboard layout). Fix e.g. CTRL+A, CTRL+Z, CTRL+Y shortcuts. (#456, #2625)
+- Backends: SDL: Submit key data using io.AddKeyEvent(). Submit keymods using io.AddKeyModsEvent() at the same time. (#2625)
+- Backends: SDL: Retrieve mouse position using SDL_MOUSEMOTION/SDL_WINDOWEVENT_LEAVE + fallback when focused but not hovered/captured.
+- Backends: SDL: Submit mouse data using io.AddMousePosEvent(), AddMouseButtonEvent(), AddMouseWheelEvent() functions. (#4921)
+- Backends: SDL: Maintain a MouseButtonsDown mask instead of using ImGui::IsAnyMouseDown() which will be obsoleted.
+- Backends: SDL: Submit gamepad data using io.AddKeyEvent/AddKeyAnalogEvent() functions, stopped writing to io.NavInputs[]. (#4921)
+- Backends: Allegro5: Submit keys using io.AddKeyEvent(). Submit keymods using io.AddKeyModsEvent() at the same time. (#2625)
+- Backends: Allegro5: Submit mouse data using io.AddMousePosEvent(), AddMouseButtonEvent(), AddMouseWheelEvent() functions. (#4921)
+- Backends: OSX: Submit keys using io.AddKeyEvent(). Submit keymods using io.AddKeyModsEvent() at the same time. (#2625)
+- Backends: OSX: Submit mouse data using io.AddMousePosEvent(), AddMouseButtonEvent(), AddMouseWheelEvent() functions. (#4921)
+- Backends: OSX: Submit gamepad data using io.AddKeyEvent/AddKeyAnalogEvent() functions, stopped writing to io.NavInputs[]. (#4921)
+- Backends: OSX: Added basic Platform IME support. (#3108, #2598) [@liuliu]
+- Backends: OSX: Fix Game Controller nav mapping to use shoulder for both focusing and tweak speed. (#4759)
+- Backends: OSX: Fix building with old Xcode versions that are missing gamepad features. [@rokups]
+- Backends: OSX: Forward keyDown/keyUp events to OS when unused by Dear ImGui.
+- Backends: Android, GLUT: Submit keys using io.AddKeyEvent(). Submit keymods using io.AddKeyModsEvent() at the same time. (#2625)
+- Backends: Android, GLUT: Submit mouse data using io.AddMousePosEvent(), AddMouseButtonEvent(), AddMouseWheelEvent() functions. (#4858)
+- Backends: OpenGL3: Fixed a buffer overflow in imgui_impl_opengl3_loader.h init (added in 1.86). (#4468, #4830) [@dymk]
+  It would generally not have noticeable side-effect at runtime but would be detected by runtime checkers.
+- Backends: OpenGL3: Fix OpenGL ES2 includes on Apple systems. [@rokups]
+- Backends: Metal: Added Apple Metal C++ API support. (#4824, #4746) [@luigifcruz]
+  Enable with '#define IMGUI_IMPL_METAL_CPP' in your imconfig.h file.
+- Backends: Metal: Ignore ImDrawCmd where ElemCount == 0, which are normally not emitted by the library but
+  can theoretically be created by user code manipulating a ImDrawList. (#4857)
+- Backends: Vulkan: Added support for ImTextureID as VkDescriptorSet, add ImGui_ImplVulkan_AddTexture(). (#914) [@martty]
+- Backends: SDL_Renderer: Fix texture atlas format on big-endian hardware (#4927) [@Clownacy]
+- Backends: WebGPU: Fixed incorrect size parameters in wgpuRenderPassEncoderSetIndexBuffer() and
+  wgpuRenderPassEncoderSetVertexBuffer() calls. (#4891) [@FeepsDev]
+
+
+-----------------------------------------------------------------------
+ VERSION 1.86 (Released 2021-12-22)
+-----------------------------------------------------------------------
+
+Decorated log: https://github.com/ocornut/imgui/releases/tag/v1.86
+
+Breaking Changes:
+
+- Removed CalcListClipping() function. Prefer using ImGuiListClipper which can return non-contiguous ranges.
+  Please open an issue if you think you really need this function. (#3841)
+- Backends: OSX: Added NSView* parameter to ImGui_ImplOSX_Init(). (#4759) [@stuartcarnie]
+- Backends: Marmalade: Removed obsolete Marmalade backend (imgui_impl_marmalade.cpp) + example app. (#368, #375)
+  Find last supported version at https://github.com/ocornut/imgui/wiki/Bindings
+
+Other Changes:
+
+- Added an assertion for the common user mistake of using "" as an identifier at the root level of a window
+  instead of using "##something". Empty identifiers are valid and useful in a very small amount of cases,
+  but 99.9% of the time if you need an empty label you should use "##something". (#1414, #2562, #2807, #4008,
+  #4158, #4375, #4548, #4657, #4796). READ THE FAQ ABOUT HOW THE ID STACK WORKS -> https://dearimgui.org/faq
+- Added GetMouseClickedCount() function, returning the number of successive clicks. (#3229) [@kudaba]
+  (so IsMouseDoubleClicked(ImGuiMouseButton_Left) is same as GetMouseClickedCount(ImGuiMouseButton_Left) == 2,
+  but it allows testing for triple clicks and more).
+- Modals: fixed issue hovering popups inside a child windows inside a modal. (#4676, #4527)
+- Modals, Popups, Windows: changes how appearing windows are interrupting popups and modals. (#4317) [@rokups]
+  - appearing windows created from within the begin stack of a popup/modal will no longer close it.
+  - appearing windows created not within the begin stack of a modal will no longer close the modal,
+    and automatically appear behind it.
+- Fixed IsWindowFocused()/IsWindowHovered() issues with child windows inside popups. (#4676)
+- Nav: Ctrl+tabbing to cycle through windows is now enabled regardless of using the _NavEnableKeyboard
+  configuration flag. This is part of an effort to generalize the use of keyboard inputs. (#4023, #787).
+  Note that while this is active you can also moving windows (with arrow) and resize (shift+arrows).
+- Nav: tabbing now cycles through clipped items and scroll accordingly. (#4449)
+- Nav: pressing PageUp/PageDown/Home/End when in Menu layer automatically moves back to Main layer.
+- Nav: fixed resizing window from borders setting navigation to Menu layer.
+- Nav: prevent child from clipping items when using _NavFlattened and parent has a pending request.
+- Nav: pressing Esc to exit a child window reactivates the Nav highlight if it was disabled by mouse.
+- Nav: with ImGuiConfigFlags_NavEnableSetMousePos enabled: Fixed absolute mouse position when using
+  Home/End leads to scrolling. Fixed not setting mouse position when a failed move request (e.g. when
+  already at edge) reactivates the navigation highlight.
+- Menus: fixed closing a menu inside a popup/modal by clicking on the popup/modal. (#3496, #4797)
+- Menus: fixed closing a menu by clicking on its menu-bar item when inside a popup. (#3496, #4797) [@xndcn]
+- Menus: fixed menu inside a popup/modal not inhibiting hovering of items in the popup/modal. (#3496, #4797)
+- Menus: fixed sub-menu items inside a popups from closing the popup.
+- Menus: fixed top-level menu from not consistently using style.PopupRounding. (#4788)
+- InputText, Nav: fixed repeated calls to SetKeyboardFocusHere() preventing to use InputText(). (#4682)
+- Inputtext, Nav: fixed using SetKeyboardFocusHere() on InputTextMultiline(). (#4761)
+- InputText: made double-click select word, triple-line select line. Word delimitation logic differs
+  slightly from the one used by CTRL+arrows. (#2244)
+- InputText: fixed ReadOnly flag preventing callbacks from receiving the text buffer. (#4762) [@actondev]
+- InputText: fixed Shift+Delete from not cutting into clipboard. (#4818, #1541) [@corporateshark]
+- InputTextMultiline: fixed incorrect padding when FrameBorder > 0. (#3781, #4794)
+- InputTextMultiline: fixed vertical tracking with large values of FramePadding.y. (#3781, #4794)
+- Separator: fixed cover all columns while called inside a table. (#4787)
+- Clipper: currently focused item is automatically included in clipper range.
+  Fixes issue where e.g. drag and dropping an item and scrolling ensure the item source location is
+  still submitted. (#3841, #1725) [@GamingMinds-DanielC, @ocornut]
+- Clipper: added ForceDisplayRangeByIndices() to force a given item (or several) to be stepped out
+  during a clipping operation. (#3841) [@@GamingMinds-DanielC]
+- Clipper: rework so gamepad/keyboard navigation doesn't create spikes in number of items requested
+  by the clipper to display. (#3841)
+- Clipper: fixed content height declaration slightly mismatching the value of when not using a clipper.
+  (an additional ItemSpacing.y was declared, affecting scrollbar range).
+- Clipper: various and incomplete changes to tame down scrolling and precision issues on very large ranges.
+  Passing an explicit height to the clipper now allows larger ranges. (#3609, #3962).
+- Clipper: fixed invalid state when number of frozen table row is smaller than ItemCount.
+- Drag and Drop: BeginDragDropSource() with ImGuiDragDropFlags_SourceAllowNullID doesn't lose
+  tooltip when scrolling. (#143)
+- Fonts: fixed infinite loop in ImFontGlyphRangesBuilder::AddRanges() when passing UINT16_MAX or UINT32_MAX
+  without the IMGUI_USE_WCHAR32 compile-time option. (#4802) [@SlavicPotato]
+- Metrics: Added a node showing windows in submission order and showing the Begin() stack.
+- Misc: Added missing ImGuiMouseCursor_NotAllowed cursor for software rendering (when the
+  io.MouseDrawCursor flag is enabled). (#4713) [@nobody-special666]
+- Misc: Fixed software mouse cursor being rendered multiple times if Render() is called more than once.
+- Misc: Fix MinGW DLL build issue (when IMGUI_API is defined). [@rokups]
+- CI: Add MinGW DLL build to test suite. [@rokups]
+- Backends: Vulkan: Call vkCmdSetScissor() at the end of render with a full-viewport to reduce
+  likehood of issues with people using VK_DYNAMIC_STATE_SCISSOR in their app without calling
+  vkCmdSetScissor() explicitly every frame. (#4644)
+- Backends: OpenGL3: Using buffer orphaning + glBufferSubData(), seems to fix leaks with multi-viewports
+  with some Intel HD drivers, and perhaps improve performances. (#4468, #4504, #2981, #3381) [@parbo]
+- Backends: OpenGL2, Allegro5, Marmalade: Fixed mishandling of the ImDrawCmd::IdxOffset field.
+  This is an old bug, but due to the way we created drawlists, it never had any visible side-effect before.
+  The new code for handling Modal and CTRL+Tab dimming/whitening recently made the bug surface. (#4790)
+- Backends: Win32: Store left/right variants of Ctrl/Shift/Alt mods in KeysDown[] array. (#2625) [@thedmd]
+- Backends: DX12: Fixed DRAW_EMPTY_SCISSOR_RECTANGLE warnings. (#4775)
+- Backends: SDL_Renderer: Added support for large meshes (64k+ vertices) with 16-bit indices,
+  enabling 'ImGuiBackendFlags_RendererHasVtxOffset' in the backend. (#3926) [@rokups]
+- Backends: SDL_Renderer: Fix for SDL 2.0.19+ RenderGeometryRaw() API signature change. (#4819) [@sridenour]
+- Backends: OSX: Generally fix keyboard support. Keyboard arrays indexed using kVK_* codes, e.g.
+  ImGui::IsKeyPressed(kVK_Space). Don't set mouse cursor shape unconditionally. Handle two fingers scroll
+  cancel event. (#4759, #4253, #1873) [@stuartcarnie]
+- Backends: OSX: Add Game Controller support (need linking GameController framework) (#4759) [@stuartcarnie]
+- Backends: WebGPU: Passing explicit buffer sizes to wgpuRenderPassEncoderSetVertexBuffer() and
+  wgpuRenderPassEncoderSetIndexBuffer() functions as validation layers appears to not do what the
+  in-flux specs says. (#4766) [@meshula]
+
+
 -----------------------------------------------------------------------
  VERSION 1.85 (Released 2021-10-12)
 -----------------------------------------------------------------------
+
+Decorated log: https://github.com/ocornut/imgui/releases/tag/v1.85
 
 This is the last release officially supporting C++03 and Visual Studio 2008/2010. (#4537)
 We expect that the next release will require a subset of the C++11 language (VS 2012~, GCC 4.8.1, Clang 3.3).

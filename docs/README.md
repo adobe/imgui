@@ -120,7 +120,7 @@ Integrating Dear ImGui within your custom engine is a matter of 1) wiring mouse/
 Officially maintained backends/bindings (in repository):
 - Renderers: DirectX9, DirectX10, DirectX11, DirectX12, Metal, OpenGL/ES/ES2, SDL_Renderer, Vulkan, WebGPU.
 - Platforms: GLFW, SDL2, Win32, Glut, OSX, Android.
-- Frameworks: Emscripten, Allegro5, Marmalade.
+- Frameworks: Allegro5, Emscripten.
 
 [Third-party backends/bindings](https://github.com/ocornut/imgui/wiki/Bindings) wiki page:
 - Languages: C, C# and: Beef, ChaiScript, Crystal, D, Go, Haskell, Haxe/hxcpp, Java, JavaScript, Julia, Kotlin, Lobster, Lua, Odin, Pascal, PureBasic, Python, Ruby, Rust, Swift...
@@ -134,7 +134,7 @@ Also see [Wiki](https://github.com/ocornut/imgui/wiki) for more links and ideas.
 
 ### Upcoming Changes
 
-Some of the goals for 2021 are:
+Some of the goals for 2022 are:
 - Work on Docking (see [#2109](https://github.com/ocornut/imgui/issues/2109), in public [docking](https://github.com/ocornut/imgui/tree/docking) branch)
 - Work on Multi-Viewport / Multiple OS windows. (see [#1542](https://github.com/ocornut/imgui/issues/1542), in public [docking](https://github.com/ocornut/imgui/tree/docking) branch looking for feedback)
 - Work on gamepad/keyboard controls. (see [#787](https://github.com/ocornut/imgui/issues/787))
@@ -203,13 +203,13 @@ Ongoing Dear ImGui development is currently financially supported by users and p
 - [Blizzard](https://careers.blizzard.com/en-us/openings/engineering/all/all/all/1)
 
 *Double-chocolate sponsors*
-- [Google](https://github.com/google/filament), [Nvidia](https://developer.nvidia.com/nvidia-omniverse), [Ubisoft](https://montreal.ubisoft.com/en/ubisoft-sponsors-user-interface-library-for-c-dear-imgui)
+- [Ubisoft](https://montreal.ubisoft.com/en/ubisoft-sponsors-user-interface-library-for-c-dear-imgui), [Supercell](https://supercell.com)
 
 *Chocolate sponsors*
-- [Activision](https://careers.activision.com/c/programmingsoftware-engineering-jobs), [Adobe](https://www.adobe.com/products/medium.html), [Aras Pranckevičius](https://aras-p.info), [Arkane Studios](https://www.arkane-studios.com), [Epic](https://www.unrealengine.com/en-US/megagrants), [RAD Game Tools](http://www.radgametools.com/)
+- [Activision](https://careers.activision.com/c/programmingsoftware-engineering-jobs), [Adobe](https://www.adobe.com/products/medium.html), [Aras Pranckevičius](https://aras-p.info), [Arkane Studios](https://www.arkane-studios.com), [Epic](https://www.unrealengine.com/en-US/megagrants), [Google](https://github.com/google/filament), [Nvidia](https://developer.nvidia.com/nvidia-omniverse), [RAD Game Tools](http://www.radgametools.com/)
 
 *Salty-caramel sponsors*
-- [Framefield](http://framefield.com), [Grinding Gear Games](https://www.grindinggear.com), [Kylotonn](https://www.kylotonn.com), [Next Level Games](https://www.nextlevelgames.com), [O-Net Communications (USA)](http://en.o-netcom.com), [Supercell](https://supercell.com).
+- [Framefield](http://framefield.com), [Grinding Gear Games](https://www.grindinggear.com), [Kylotonn](https://www.kylotonn.com), [Next Level Games](https://www.nextlevelgames.com), [O-Net Communications (USA)](http://en.o-netcom.com)
 
 Please see [detailed list of Dear ImGui supporters](https://github.com/ocornut/imgui/wiki/Sponsors) for past sponsors.
 From November 2014 to December 2019, ongoing development has also been financially supported by its users on Patreon and through individual donations.
