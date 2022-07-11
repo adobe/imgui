@@ -6417,7 +6417,6 @@ bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags fl
         TablePopBackgroundChannel();
 
     RenderTextClipped(text_min, text_max, label, NULL, &label_size, style.SelectableTextAlign, &bb);
-    if (flags & ImGuiSelectableFlags_Disabled) PopStyleColor();
     if (window->DC.IsComboPopup && selected) PopStyleColor(); // ImGui-Spectrum: undo blue color from above
 
     // Automatically close popups
