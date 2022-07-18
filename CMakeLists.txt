@@ -36,6 +36,7 @@ target_compile_definitions(imgui PUBLIC
     # IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/path/to/imconfig.h" # to use your own imconfig.h
 )
 target_include_directories(imgui PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_features(imgui PUBLIC cxx_std_11)
 
 # the following should go in different files, but we're keeping things here to avoid future conflicts. 
 if(NOT TARGET glfw)
