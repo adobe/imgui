@@ -57,7 +57,7 @@ The above functions are likely to cause merge issue in the future if ImGui's aut
 ### How to update ater ImGui releases:
 0. If you don't yet have the original remote in your local copy (check with `git remote -v`), add it: 
 ```
-git remote add ocornut https://github.com/ocornut/imgui.git`
+git remote add ocornut https://github.com/ocornut/imgui.git
 ```
 
 1. pull changes 
