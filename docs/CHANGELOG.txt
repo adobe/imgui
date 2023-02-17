@@ -99,10 +99,178 @@ Other changes:
 
 
 -----------------------------------------------------------------------
+ VERSION 1.89.3 (Released 2023-02-14)
+-----------------------------------------------------------------------
+
+Decorated log and release notes: https://github.com/ocornut/imgui/releases/tag/v1.89.3
+
+Breaking Changes:
+
+- Backends+Examples: SDL2: renamed all unnumbered references to "sdl" to "sdl2".
+  This is in prevision for the future release of SDL3 and its associated backend. (#6146)
+  - imgui_impl_sdl.cpp -> imgui_impl_sdl2.cpp
+  - imgui_impl_sdl.h   -> imgui_impl_sdl2.h
+  - example_sdl_xxxx/  -> example_sdl2_xxxx/ (folders and projects)
+
+All changes:
+
+- SeparatorText(): Added SeparatorText() widget. (#1643) [@phed, @ocornut]
+  - Added to style: float  SeparatorTextBorderSize.
+  - Added to style: ImVec2 SeparatorTextAlign, SeparatorTextPadding.
+- Tables: Raised max Columns count from 64 to 512. (#6094, #5305, #4876, #3572)
+  The previous limit was due to using 64-bit integers but we moved to bits-array
+  and tweaked the system enough to ensure no performance loss.
+- Tables: Solved an ID conflict issue with multiple-instances of a same table,
+  due to how unique table instance id was generated. (#6140) [@ocornut, @rodrigorc]
+- Inputs, Scrolling: Made horizontal scroll wheel and horizontal scroll direction consistent
+  across backends/os. (#4019, #6096, #1463) [@PathogenDavid, @ocornut, @rokups]
+  - Clarified that 'wheel_y > 0.0f' scrolls Up, 'wheel_y > 0.0f' scrolls Down.
+    Clarified that 'wheel_x > 0.0f' scrolls Left, 'wheel_x > 0.0f' scrolls Right.
+  - Backends: Fixed horizontal scroll direction for Win32 and SDL backends. (#4019)
+  - Shift+WheelY support on non-OSX machines was already correct. (#2424, #1463)
+    (whereas on OSX machines Shift+WheelY turns into WheelX at the OS level).
+  - If you use a custom backend, you should verify horizontal wheel direction.
+    - Axises are flipped by OSX for mouse & touch-pad when 'Natural Scrolling' is on.
+    - Axises are flipped by Windows for touch-pad when 'Settings->Touchpad->Down motion scrolls up' is on.
+    - You can use 'Demo->Tools->Debug Log->IO" to visualize values submitted to Dear ImGui.
+  - Known issues remaining with Emscripten:
+    - The magnitude of wheeling values on Emscripten was improved but isn't perfect. (#6096)
+    - When running the Emscripten app on a Mac with a mouse, SHIFT+WheelY doesn't turn into WheelX.
+      This is because we don't know that we are running on Mac and apply our own Shift+swapping
+      on top of OSX' own swapping, so wheel axises are swapped twice. Emscripten apps may need
+      to find a way to detect this and set io.ConfigMacOSXBehaviors manually (if you know a way
+      let us know!), or offer the "OSX-style behavior" option to their user.
+- Window: Avoid rendering shapes for hidden resize grips.
+- Text: Fixed layouting of wrapped-text block skipping successive empty lines,
+  regression from the fix in 1.89.2. (#5720, #5919)
+- Text: Fixed clipping of single-character "..." ellipsis (U+2026 or U+0085) when font
+  is scaled. Scaling wasn't taken into account, leading to ellipsis character straying
+  slightly out of its expected boundaries. (#2775)
+- Text: Tweaked rendering of three-dots "..." ellipsis variant. (#2775, #4269)
+- InputText: Added support for Ctrl+Delete to delete up to end-of-word. (#6067) [@ajweeks]
+  (Not adding Super+Delete to delete to up to end-of-line on OSX, as OSX doesn't have it)
+- InputText: On OSX, inhibit usage of Alt key to toggle menu when active (used for work skip).
+- Menus: Fixed layout of MenuItem()/BeginMenu() when label contains a '\n'. (#6116) [@imkcy9]
+- ColorEdit, ColorPicker: Fixed hue/saturation preservation logic from interfering with
+  the displayed value (but not stored value) of others widgets instances. (#6155)
+- PlotHistogram, PlotLines: Passing negative sizes honor alignment like other widgets.
+- Combo: Allow SetNextWindowSize() to alter combo popup size. (#6130)
+- Fonts: Assert that in each GlyphRanges[] pairs first is <= second.
+- ImDrawList: Added missing early-out in AddPolyline() and AddConvexPolyFilled() when
+  color alpha is zero.
+- Misc: Most text functions treat "%s" as a shortcut to no-formatting. (#3466)
+- Misc: Tolerate zero delta-time under Emscripten as backends are imprecise in their
+  values for io.DeltaTime, and browser features such as "privacy.resistFingerprinting=true"
+  can exacerbate that. (#6114, #3644)
+- Backends: OSX: Fixed scroll/wheel scaling for devices emitting events with
+  hasPreciseScrollingDeltas==false (e.g. non-Apple mices).
+- Backends: Win32: flipping WM_MOUSEHWHEEL horizontal value to match other backends and
+  offer consistent horizontal scrolling direction. (#4019)
+- Backends: SDL2: flipping SDL_MOUSEWHEEL horizontal value to match other backends and
+  offer consistent horizontal scrolling direction. (#4019)
+- Backends: SDL2: Removed SDL_MOUSEWHEEL value clamping. (#4019, #6096, #6081)
+- Backends: SDL2: Added support for SDL 2.0.18+ preciseX/preciseY mouse wheel data
+  for smooth scrolling as reported by SDL. (#4019, #6096)
+- Backends: SDL2: Avoid calling SDL_SetCursor() when cursor has not changed, as the function
+  is surprisingly costly on Mac with latest SDL (already fixed in SDL latest trunk). (#6113)
+- Backends: SDL2: Implement IME handler to call SDL_SetTextInputRect()/SDL_StartTextInput().
+  It will only works with SDL 2.0.18+ if your code calls 'SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1")'
+  prior to calling SDL_CreateWindow(). Updated all examples accordingly. (#6071, #1953)
+- Backends: SDL3: Added experimental imgui_impl_sdl3.cpp backend. (#6146) [@dovker, @ocornut]
+  SDL 3.0.0 has not yet been released, so it is possible that its specs/api will change before
+  release. This backend is provided as a convenience for early adopters etc. We don't recommend
+  switching to SDL3 before it is released.
+- Backends: GLFW: Registering custom low-level mouse wheel handler to get more accurate
+  scrolling impulses on Emscripten. (#4019, #6096) [@ocornut, @wolfpld, @tolopolarity]
+- Backends: GLFW: Added ImGui_ImplGlfw_SetCallbacksChainForAllWindows() to instruct backend
+  to chain callbacks even for secondary viewports/windows. User callbacks may need to test
+  the 'window' parameter. (#6142)
+- Backends: OpenGL3: Fixed GL loader compatibility with 2.x profiles. (#6154, #4445, #3530) [@grauw]
+- Backends: WebGPU: Fixed building for latest WebGPU specs (remove implicit layout generation).
+  (#6117, #4116, #3632) [@tonygrue, @bfierz]
+- Examples: refactored SDL2+GL and GLFW+GL examples to compile with Emscripten.
+  (#2492, #2494, #3699, #3705) [@ocornut, @nicolasnoble]
+  The dedicated example_emscripten_opengl3/ has been removed.
+- Examples: Added SDL3+GL experimental example. (#6146)
+- Examples: Win32: Fixed examples using RegisterClassW() since 1.89 to also call
+  DefWindowProcW() instead of DefWindowProc() so that title text are correctly converted
+  when application is compiled without /DUNICODE. (#5725, #5961, #5975) [@markreidvfx]
+- Examples: SDL2+SDL_Renderer: Added call to SDL_RenderSetScale() to fix display on a
+  Retina display (albeit lower-res as our other unmodified examples). (#6121, #6065, #5931).
+
+Docking+Viewports Branch:
+
+- Backends: GLFW: Handle unsupported glfwGetVideoMode() for Emscripten. (#6096)
+
+
+-----------------------------------------------------------------------
+ VERSION 1.89.2 (Released 2023-01-05)
+-----------------------------------------------------------------------
+
+Decorated log and release notes: https://github.com/ocornut/imgui/releases/tag/v1.89.2
+
+All changes:
+
+- Tables, Nav, Scrolling: fixed scrolling functions and focus tracking with frozen rows and
+  frozen columns. Windows now have a better understanding of outer/inner decoration sizes,
+  which should later lead us toward more flexible uses of menu/status bars. (#5143, #3692)
+- Tables, Nav: frozen columns are not part of menu layer and can be crossed over. (#5143, #3692)
+- Tables, Columns: fixed cases where empty columns may lead to empty ImDrawCmd. (#4857, #5937)
+- Tables: fixed matching width of synchronized tables (multiple tables with same id) when only
+  some instances have a vertical scrollbar and not all. (#5920)
+- Fixed cases where CTRL+Tab or Modal can occasionally lead to the creation of ImDrawCmd with
+  zero triangles, which would makes the render loop of some backends assert (e.g. Metal with
+  debugging, Allegro). (#4857, #5937)
+- Inputs, IO: reworked ImGuiMod_Shortcut to redirect to Ctrl/Super at runtime instead of
+  compile-time, being consistent with our support for io.ConfigMacOSXBehaviors and making it
+  easier for bindings generators to process that value. (#5923, #456)
+- Inputs, Scrolling: better selection of scrolling window when hovering nested windows
+  and when backend/OS is emitting dual-axis wheeling inputs (typically touch pads on macOS).
+  We now select a primary axis based on recent events, and select a target window based on it.
+  We expect this behavior to be further improved/tweaked. (#3795, #4559) [@ocornut, @folays]
+- InputText: fixed cursor navigation when pressing Up Arrow on the last character of a
+  multiline buffer which doesn't end with a carriage return. (#6000)
+- Text: fixed layouting of wrapped-text block when the last source line is above the
+  clipping region. Regression added in 1.89. (#5720, #5919)
+- Misc: added GetItemID() in public API. It is not often expected that you would use this,
+  but it is useful for Shortcut() and upcoming owner-aware input functions which wants to
+  be implemented with public API.
+- Fonts: imgui_freetype: fixed a packing issue which in some occurrences would prevent large
+  amount of glyphs from being packed correctly. (#5788, #5829)
+- Fonts: added a 'void* UserData' field in ImFontAtlas, as a convenience for use by
+  applications using multiple font atlases.
+- Demo: simplified "Inputs" section, moved contents to Metrics->Inputs.
+- Debug Tools: Metrics: added "Inputs" section, moved from Demo for consistency.
+- Misc: fixed parameters to IMGUI_DEBUG_LOG() not being dead-stripped when building
+  with IMGUI_DISABLE_DEBUG_TOOLS is used. (#5901) [@Teselka]
+- Misc: fixed compile-time detection of SSE features on MSVC 32-bits builds. (#5943) [@TheMostDiligent]
+- Examples: DirectX10, DirectX11: try WARP software driver if hardware driver is not available. (#5924, #5562)
+- Backends: GLFW: Fixed mods state on Linux when using Alt-GR text input (e.g. German keyboard layout), which
+  could lead to broken text input. Revert a 2022/01/17 change were we resumed using mods provided by GLFW,
+  turns out they are faulty in this specific situation. (#6034)
+- Backends: Allegro5: restoring using al_draw_indexed_prim() when Allegro version is >= 5.2.5. (#5937) [@Espyo]
+- Backends: Vulkan: Fixed sampler passed to ImGui_ImplVulkan_AddTexture() not being honored as we were using
+  an immutable sampler. (#5502, #6001, #914) [@martin-ejdestig, @rytisss]
+
+Docking+Viewports Branch:
+
+- Docking: Internals: fixed DockBuilderCopyDockSpace() crashing when windows not in the
+  remapping list are docked on the left or top side of a split. (#6035)
+- Docking: fixed DockSpace() with ImGuiDockNodeFlags_KeepAliveOnly marking current window
+  as written to, even if it doesn't technically submit an item. This allow using KeepAliveOnly
+  from any window location. (#6037)
+- Backends: OSX: fixed typo in ImGui_ImplOSX_GetWindowSize that would cause issues when resiing
+  from OS decorations, if they are enabled on secondary viewports. (#6009) [@sivu]
+- Backends: Metal: fixed secondary viewport rendering. (#6015) [@dmirty-kuzmenko]
+
+
+-----------------------------------------------------------------------
  VERSION 1.89.1 (Released 2022-11-24)
 -----------------------------------------------------------------------
 
 Decorated log and release notes: https://github.com/ocornut/imgui/releases/tag/v1.89.1
+
+Other changes:
 
 - Scrolling, Focus: fixed SetKeyboardFocusHere()/SetItemDefaultFocus() during a window-appearing
   frame (and associated lower-level functions e.g. ScrollToRectEx()) from not centering item. (#5902)
@@ -150,6 +318,11 @@ Breaking changes:
   Without '#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS' this will silently be fixed until we obsolete it.
   (This incorrect pattern has been mentioned or suggested in: #4510, #3355, #1760, #1490, #4152, #150,
    threads have been amended to refer to this issue).
+- Inputs: ImGuiKey is now a typed enum, allowing ImGuiKey_XXX symbols to be named in debuggers. (#4921)
+  This will require uses of legacy backend-dependent indices to be casted, e.g.
+   - with imgui_impl_glfw:  IsKeyPressed(GLFW_KEY_A) -> IsKeyPressed((ImGuiKey)GLFW_KEY_A);
+   - with imgui_impl_win32: IsKeyPressed('A')        -> IsKeyPressed((ImGuiKey)'A')
+   - etc. however if you are upgrading code you might as well use the backend-agnostic IsKeyPressed(ImGuiKey_A) now.
 - Renamed and merged keyboard modifiers key enums and flags into a same set:  (#4921, #456)
    - ImGuiKey_ModCtrl  and ImGuiModFlags_Ctrl  -> ImGuiMod_Ctrl
    - ImGuiKey_ModShift and ImGuiModFlags_Shift -> ImGuiMod_Shift
@@ -278,7 +451,6 @@ Other Changes:
 - ImDrawList: Not using alloca() anymore, lift single polygon size limits. (#5704, #1811)
 - Platform IME: [Windows] Removed call to ImmAssociateContextEx() leading to freeze on some setups.
   (#2589, #5535, #5264, #4972)
-- Misc: ImGuiKey is now a typed enum, allowing ImGuiKey_XXX symbols to be named in debuggers. (#4921)
 - Misc: better error reporting for PopStyleColor()/PopStyleVar() + easier to recover. (#1651)
 - Misc: io.Framerate moving average now converge in 60 frames instead of 120. (#5236, #4138)
 - Debug Tools: Debug Log: Visually locate items when hovering a 0xXXXXXXXX value. (#5855)
