@@ -10,7 +10,7 @@ namespace ImGui {
         void LoadFont(float size) {
             ImGuiIO& io = ImGui::GetIO();
             ImFont* font = io.Fonts->AddFontFromMemoryCompressedTTF(SourceSansProRegular_compressed_data, SourceSansProRegular_compressed_size, size);
-            assert(font != nullptr);
+            IM_ASSERT(font != nullptr);
             io.FontDefault = font;
         }
 
