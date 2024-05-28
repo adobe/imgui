@@ -33,6 +33,7 @@
 
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
+//  2024-04-19: Vulkan: Added convenience support for Volk via IMGUI_IMPL_VULKAN_USE_VOLK define (you can also use IMGUI_IMPL_VULKAN_NO_PROTOTYPES + wrap Volk via ImGui_ImplVulkan_LoadFunctions().)
 //  2024-02-14: *BREAKING CHANGE*: Moved RenderPass parameter from ImGui_ImplVulkan_Init() function to ImGui_ImplVulkan_InitInfo structure. Not required when using dynamic rendering.
 //  2024-02-12: *BREAKING CHANGE*: Dynamic rendering now require filling PipelineRenderingCreateInfo structure.
 //  2024-01-19: Vulkan: Fixed vkAcquireNextImageKHR() validation errors in VulkanSDK 1.3.275 by allocating one extra semaphore than in-flight frames. (#7236)
@@ -41,14 +42,14 @@
 //  2024-01-03: Vulkan: Stopped creating command pools with VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT as we don't reset them.
 //  2023-11-29: Vulkan: Fixed mismatching allocator passed to vkCreateCommandPool() vs vkDestroyCommandPool(). (#7075)
 //  2023-11-10: *BREAKING CHANGE*: Removed parameter from ImGui_ImplVulkan_CreateFontsTexture(): backend now creates its own command-buffer to upload fonts.
-//              *BREAKING CHANGE*: Removed ImGui_ImplVulkan_DestroyFontUploadObjects() which is now unecessary as we create and destroy those objects in the backend.
+//              *BREAKING CHANGE*: Removed ImGui_ImplVulkan_DestroyFontUploadObjects() which is now unnecessary as we create and destroy those objects in the backend.
 //              ImGui_ImplVulkan_CreateFontsTexture() is automatically called by NewFrame() the first time.
 //              You can call ImGui_ImplVulkan_CreateFontsTexture() again to recreate the font atlas texture.
 //              Added ImGui_ImplVulkan_DestroyFontsTexture() but you probably never need to call this.
 //  2023-07-04: Vulkan: Added optional support for VK_KHR_dynamic_rendering. User needs to set init_info->UseDynamicRendering = true and init_info->ColorAttachmentFormat.
 //  2023-01-02: Vulkan: Fixed sampler passed to ImGui_ImplVulkan_AddTexture() not being honored + removed a bunch of duplicate code.
 //  2022-10-11: Using 'nullptr' instead of 'NULL' as per our switch to C++11.
-//  2022-10-04: Vulkan: Added experimental ImGui_ImplVulkan_RemoveTexture() for api symetry. (#914, #5738).
+//  2022-10-04: Vulkan: Added experimental ImGui_ImplVulkan_RemoveTexture() for api symmetry. (#914, #5738).
 //  2022-01-20: Vulkan: Added support for ImTextureID as VkDescriptorSet. User need to call ImGui_ImplVulkan_AddTexture(). Building for 32-bit targets requires '#define ImTextureID ImU64'. (#914).
 //  2021-10-15: Vulkan: Call vkCmdSetScissor() at the end of render a full-viewport to reduce likehood of issues with people using VK_DYNAMIC_STATE_SCISSOR in their app without calling vkCmdSetScissor() explicitly every frame.
 //  2021-06-29: Reorganized backend to pull data from a single structure to facilitate usage with multiple-contexts (all g_XXXX access changed to bd->XXXX).
@@ -108,12 +109,13 @@ void ImGui_ImplVulkanH_CreateWindowCommandBuffers(VkPhysicalDevice physical_devi
 
 // Vulkan prototypes for use with custom loaders
 // (see description of IMGUI_IMPL_VULKAN_NO_PROTOTYPES in imgui_impl_vulkan.h
-#ifdef VK_NO_PROTOTYPES
+#if defined(VK_NO_PROTOTYPES) && !defined(VOLK_H_)
+#define IMGUI_IMPL_VULKAN_USE_LOADER
 static bool g_FunctionsLoaded = false;
 #else
 static bool g_FunctionsLoaded = true;
 #endif
-#ifdef VK_NO_PROTOTYPES
+#ifdef IMGUI_IMPL_VULKAN_USE_LOADER
 #define IMGUI_VULKAN_FUNC_MAP(IMGUI_VULKAN_FUNC_MAP_MACRO) \
     IMGUI_VULKAN_FUNC_MAP_MACRO(vkAllocateCommandBuffers) \
     IMGUI_VULKAN_FUNC_MAP_MACRO(vkAllocateDescriptorSets) \
@@ -184,7 +186,7 @@ static bool g_FunctionsLoaded = true;
 #define IMGUI_VULKAN_FUNC_DEF(func) static PFN_##func func;
 IMGUI_VULKAN_FUNC_MAP(IMGUI_VULKAN_FUNC_DEF)
 #undef IMGUI_VULKAN_FUNC_DEF
-#endif // VK_NO_PROTOTYPES
+#endif // IMGUI_IMPL_VULKAN_USE_LOADER
 
 #ifdef IMGUI_IMPL_VULKAN_HAS_DYNAMIC_RENDERING
 static PFN_vkCmdBeginRenderingKHR   ImGuiImplVulkanFuncs_vkCmdBeginRenderingKHR;
@@ -1048,8 +1050,8 @@ bool    ImGui_ImplVulkan_LoadFunctions(PFN_vkVoidFunction(*loader_func)(const ch
     // Load function pointers
     // You can use the default Vulkan loader using:
     //      ImGui_ImplVulkan_LoadFunctions([](const char* function_name, void*) { return vkGetInstanceProcAddr(your_vk_isntance, function_name); });
-    // But this would be equivalent to not setting VK_NO_PROTOTYPES.
-#ifdef VK_NO_PROTOTYPES
+    // But this would be roughly equivalent to not setting VK_NO_PROTOTYPES.
+#ifdef IMGUI_IMPL_VULKAN_USE_LOADER
 #define IMGUI_VULKAN_FUNC_LOAD(func) \
     func = reinterpret_cast<decltype(func)>(loader_func(#func, user_data)); \
     if (func == nullptr)   \
@@ -1078,7 +1080,7 @@ bool    ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info)
     if (info->UseDynamicRendering)
     {
 #ifdef IMGUI_IMPL_VULKAN_HAS_DYNAMIC_RENDERING
-#ifndef VK_NO_PROTOTYPES
+#ifndef IMGUI_IMPL_VULKAN_USE_LOADER
         ImGuiImplVulkanFuncs_vkCmdBeginRenderingKHR = reinterpret_cast<PFN_vkCmdBeginRenderingKHR>(vkGetInstanceProcAddr(info->Instance, "vkCmdBeginRenderingKHR"));
         ImGuiImplVulkanFuncs_vkCmdEndRenderingKHR = reinterpret_cast<PFN_vkCmdEndRenderingKHR>(vkGetInstanceProcAddr(info->Instance, "vkCmdEndRenderingKHR"));
 #endif
@@ -1090,6 +1092,7 @@ bool    ImGui_ImplVulkan_Init(ImGui_ImplVulkan_InitInfo* info)
     }
 
     ImGuiIO& io = ImGui::GetIO();
+    IMGUI_CHECKVERSION();
     IM_ASSERT(io.BackendRendererUserData == nullptr && "Already initialized a renderer backend!");
 
     // Setup backend capabilities flags
@@ -1131,7 +1134,7 @@ void ImGui_ImplVulkan_Shutdown()
 void ImGui_ImplVulkan_NewFrame()
 {
     ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-    IM_ASSERT(bd != nullptr && "Did you call ImGui_ImplVulkan_Init()?");
+    IM_ASSERT(bd != nullptr && "Context or backend not initialized! Did you call ImGui_ImplVulkan_Init()?");
 
     if (!bd->FontDescriptorSet)
         ImGui_ImplVulkan_CreateFontsTexture();

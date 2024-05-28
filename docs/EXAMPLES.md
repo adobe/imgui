@@ -104,8 +104,8 @@ OSX + OpenGL2 example. <BR>
 (NB: imgui_impl_osx.mm is currently not as feature complete as other platforms backends.
  You may prefer to use the GLFW Or SDL backends, which will also support Windows and Linux.)
 
-[example_emscripten_wgpu/](https://github.com/ocornut/imgui/blob/master/examples/example_emscripten_wgpu/) <BR>
-Emcripten + GLFW + WebGPU example. <BR>
+[example_glfw_wgpu/](https://github.com/ocornut/imgui/blob/master/examples/example_glfw_wgpu/) <BR>
+GLFW + WebGPU example. Supports Emscripten (web) or Dawn (desktop) <BR>
 = main.cpp + imgui_impl_glfw.cpp + imgui_impl_wgpu.cpp
 Note that the 'example_glfw_opengl3' and 'example_sdl2_opengl3' examples also supports Emscripten!
 
@@ -126,7 +126,7 @@ state, and might confuse your GPU driver. One star, not recommended.
 GLFW (Win32, Mac, Linux) + OpenGL3+/ES2/ES3 example (modern, programmable pipeline). <BR>
 = main.cpp + imgui_impl_glfw.cpp + imgui_impl_opengl3.cpp <BR>
 This uses more modern GL calls and custom shaders.<BR>
-This support building with Emscripten and targetting WebGL.<BR>
+This support building with Emscripten and targeting WebGL.<BR>
 Prefer using that if you are using modern GL or WebGL in your application.
 
 [example_glfw_vulkan/](https://github.com/ocornut/imgui/blob/master/examples/example_glfw_vulkan/) <BR>
@@ -168,7 +168,7 @@ state, and might confuse your GPU driver. One star, not recommended.
 SDL2 (Win32, Mac, Linux, etc.) + OpenGL3+/ES2/ES3 example. <BR>
 = main.cpp + imgui_impl_sdl2.cpp + imgui_impl_opengl3.cpp <BR>
 This uses more modern GL calls and custom shaders. <BR>
-This support building with Emscripten and targetting WebGL.<BR>
+This support building with Emscripten and targeting WebGL.<BR>
 Prefer using that if you are using modern GL or WebGL in your application.
 
 [example_sdl2_sdlrenderer2/](https://github.com/ocornut/imgui/blob/master/examples/example_sdl2_sdlrenderer2/) <BR>
