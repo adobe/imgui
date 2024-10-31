@@ -63,6 +63,9 @@ namespace ImGui {
             colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
             colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
             colors[ImGuiCol_CheckMark] = ColorConvertU32ToFloat4(Spectrum::GRAY50);
+            colors[ImGuiCol_Tab] = ColorConvertU32ToFloat4(Spectrum::GRAY300);
+            colors[ImGuiCol_TabSelected] = ColorConvertU32ToFloat4(Spectrum::BLUE500);
+            colors[ImGuiCol_TabHovered] = ColorConvertU32ToFloat4(Spectrum::BLUE700);
         }
 
         const unsigned int SourceSansProRegular_compressed_data[149392 / 4] =

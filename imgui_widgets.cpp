@@ -10262,7 +10262,9 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
     const ImGuiID close_button_id = p_open ? GetIDWithSeed("#CLOSE", NULL, docked_window ? docked_window->ID : id) : 0;
     bool just_closed;
     bool text_clipped;
+    if (tab_contents_visible || held || hovered) PushStyleColor(ImGuiCol_Text, Spectrum::GRAY50);
     TabItemLabelAndCloseButton(display_draw_list, bb, tab_just_unsaved ? (flags & ~ImGuiTabItemFlags_UnsavedDocument) : flags, tab_bar->FramePadding, label, id, close_button_id, tab_contents_visible, &just_closed, &text_clipped);
+    if (tab_contents_visible || held || hovered) PopStyleColor();
     if (just_closed && p_open != NULL)
     {
         *p_open = false;
