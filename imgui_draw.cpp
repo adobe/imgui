@@ -4221,29 +4221,34 @@ void ImGui::RenderArrow(ImDrawList* draw_list, ImVec2 pos, ImU32 col, ImGuiDir d
     float r = h * 0.40f * scale;
     ImVec2 center = pos + ImVec2(h * 0.50f, h * 0.50f * scale);
 
+    constexpr float m = 0.5f; // "length" of the arrow
+    constexpr float n = 0.866f; // "width" of the arrow
     ImVec2 a, b, c;
     switch (dir)
     {
     case ImGuiDir_Up:
     case ImGuiDir_Down:
         if (dir == ImGuiDir_Up) r = -r;
-        a = ImVec2(+0.000f, +0.750f) * r;
-        b = ImVec2(-0.866f, -0.750f) * r;
-        c = ImVec2(+0.866f, -0.750f) * r;
+        a = ImVec2(+.0f, +m) * r;
+        b = ImVec2(-n, -m) * r;
+        c = ImVec2(+n, -m) * r;
         break;
     case ImGuiDir_Left:
     case ImGuiDir_Right:
         if (dir == ImGuiDir_Left) r = -r;
-        a = ImVec2(+0.750f, +0.000f) * r;
-        b = ImVec2(-0.750f, +0.866f) * r;
-        c = ImVec2(-0.750f, -0.866f) * r;
+        a = ImVec2(+m, +.0f) * r;
+        b = ImVec2(-m, +n) * r;
+        c = ImVec2(-m, -n) * r;
         break;
     case ImGuiDir_None:
     case ImGuiDir_COUNT:
         IM_ASSERT(0);
         break;
     }
-    draw_list->AddTriangleFilled(center + a, center + b, center + c, col);
+    draw_list->PathLineTo(center + c);
+    draw_list->PathLineTo(center + a);
+    draw_list->PathLineTo(center + b);
+    draw_list->PathStroke(col, 0, 3.f);
 }
 
 void ImGui::RenderBullet(ImDrawList* draw_list, ImVec2 pos, ImU32 col)
