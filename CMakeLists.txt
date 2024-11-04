@@ -96,7 +96,10 @@ elseif(IMGUI_BACKEND_RENDERER STREQUAL "sdlrenderer3")
     # untested, needs work
 elseif(IMGUI_BACKEND_RENDERER STREQUAL "vulkan")
     target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.h" "${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp")
-    # untested, needs work
+    # This likely requires you to install the Vulkan SDK.
+    find_package(Vulkan REQUIRED)
+    target_link_libraries(imgui PRIVATE Vulkan::Vulkan)
+    # Untested.
 elseif(IMGUI_BACKEND_RENDERER STREQUAL "wgpu")
     target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/imgui_impl_wgpu.h" "${imgui_SOURCE_DIR}/backends/imgui_impl_wgpu.cpp")
     # untested, needs work
@@ -154,6 +157,8 @@ if(IMGUI_BUILD_EXAMPLES)
         add_executable(imgui_example "examples/example_glfw_opengl2/main.cpp")
     elseif(IMGUI_BACKEND_RENDERER STREQUAL "opengl3" AND IMGUI_BACKEND_PLATFORM STREQUAL "glfw")
         add_executable(imgui_example "examples/example_glfw_opengl3/main.cpp")
+    elseif(IMGUI_BACKEND_RENDERER STREQUAL "vulkan" AND IMGUI_BACKEND_PLATFORM STREQUAL "glfw")
+        add_executable(imgui_example "examples/example_glfw_vulkan/main.cpp")
     elseif(IMGUI_BACKEND_RENDERER STREQUAL "dx9" AND IMGUI_BACKEND_PLATFORM STREQUAL "win32")
         add_executable(imgui_example "examples/example_win32_directx9/main.cpp")
     elseif(IMGUI_BACKEND_RENDERER STREQUAL "dx10" AND IMGUI_BACKEND_PLATFORM STREQUAL "win32")
