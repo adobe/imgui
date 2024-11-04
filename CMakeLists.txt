@@ -168,6 +168,8 @@ if(IMGUI_BUILD_EXAMPLES)
         add_executable(imgui_example "examples/example_glfw_metal/main.mm")
     elseif(IMGUI_BACKEND_RENDERER STREQUAL "metal" AND IMGUI_BACKEND_PLATFORM STREQUAL "osx")
         add_executable(imgui_example "examples/example_apple_metal/main.mm")
+    elseif(IMGUI_BACKEND_RENDERER STREQUAL "opengl2" AND IMGUI_BACKEND_PLATFORM STREQUAL "osx")
+        add_executable(imgui_example "examples/example_apple_opengl2/main.mm")
     endif()
 
     if(TARGET imgui_example)
