@@ -69,7 +69,7 @@ elseif(IMGUI_BACKEND_RENDERER STREQUAL "dx12")
     target_link_libraries(imgui PRIVATE d3d12 dxgi)
 elseif(IMGUI_BACKEND_RENDERER STREQUAL "metal")
     target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/imgui_impl_metal.h" "${imgui_SOURCE_DIR}/backends/imgui_impl_metal.mm")
-    # untested, needs work
+    target_link_libraries(imgui PRIVATE "-framework Metal -framework QuartzCore")
 elseif(IMGUI_BACKEND_RENDERER STREQUAL "opengl2")
     target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/imgui_impl_opengl2.h" "${imgui_SOURCE_DIR}/backends/imgui_impl_opengl2.cpp")
 
@@ -138,7 +138,8 @@ elseif(IMGUI_BACKEND_PLATFORM STREQUAL "glut")
     # untested, needs work
 elseif(IMGUI_BACKEND_PLATFORM STREQUAL "osx")
     target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/imgui_impl_osx.h" "${imgui_SOURCE_DIR}/backends/imgui_impl_osx.mm")
-    # untested, needs work
+    target_link_libraries(imgui PRIVATE "-framework AppKit -framework MetalKit -framework Foundation -framework GameController")
+    # This builds successfully, but hangs on startup. Needs work.
 elseif(IMGUI_BACKEND_PLATFORM STREQUAL "sdl2")
     target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/imgui_impl_sdl2.h" "${imgui_SOURCE_DIR}/backends/imgui_impl_sdl2.cpp")
     # untested, needs work
@@ -168,7 +169,10 @@ if(IMGUI_BUILD_EXAMPLES)
         add_executable(imgui_example "examples/example_win32_directx12/main.cpp")
     elseif(IMGUI_BACKEND_RENDERER STREQUAL "opengl3" AND IMGUI_BACKEND_PLATFORM STREQUAL "win32")
         add_executable(imgui_example "examples/example_win32_opengl3/main.cpp")
-    
+    elseif(IMGUI_BACKEND_RENDERER STREQUAL "metal" AND IMGUI_BACKEND_PLATFORM STREQUAL "glfw")
+        add_executable(imgui_example "examples/example_glfw_metal/main.mm")
+    elseif(IMGUI_BACKEND_RENDERER STREQUAL "metal" AND IMGUI_BACKEND_PLATFORM STREQUAL "osx")
+        add_executable(imgui_example "examples/example_apple_metal/main.mm")
     endif()
 
     if(TARGET imgui_example)
