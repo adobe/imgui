@@ -432,7 +432,7 @@ int main(int, char**)
 
     // Setup Dear ImGui style
     ImGui::Spectrum::StyleColorsSpectrum();
-    // ImGui::StyleColorsDark();
+    //ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
@@ -468,6 +468,7 @@ int main(int, char**)
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+    ImGui::Spectrum::LoadFont();
     //IM_ASSERT(font != nullptr);
 
     // Our state
