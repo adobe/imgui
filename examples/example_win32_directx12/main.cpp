@@ -92,8 +92,6 @@ int main(int, char**)
     //ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
 
-    ImGui::Spectrum::LoadFont();
-
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX12_Init(g_pd3dDevice, NUM_FRAMES_IN_FLIGHT,
