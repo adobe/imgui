@@ -7043,12 +7043,6 @@ bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags fl
 
             RenderFrame(bb.Min, bb.Max, col, false, 0.0f);
         }
-        if (selected)
-        {
-            // Spectrum: add a checkmark
-            const float size = bb.GetHeight() / 3.f * 2.f;
-            RenderCheckMark(window->DrawList, ImVec2(bb.Max.x - size - style.FramePadding.x, bb.GetCenter().y - size / 2), Spectrum::BLUE600, size);
-        }
         if (g.NavId == id)
         {
             ImGuiNavRenderCursorFlags nav_render_cursor_flags = ImGuiNavRenderCursorFlags_Compact | ImGuiNavRenderCursorFlags_NoRounding;
