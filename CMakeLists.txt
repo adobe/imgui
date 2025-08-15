@@ -110,7 +110,7 @@ if(IMGUI_BACKEND_PLATFORM STREQUAL "none")
 elseif(IMGUI_BACKEND_PLATFORM STREQUAL "allegro5")
     # already included by the renderer backend above
 elseif(IMGUI_BACKEND_PLATFORM STREQUAL "android")
-    target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/android.h" "${imgui_SOURCE_DIR}/backends/android.cpp")
+    target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/imgui_impl_android.h" "${imgui_SOURCE_DIR}/backends/imgui_impl_android.cpp")
     # untested, needs work
 elseif(IMGUI_BACKEND_PLATFORM STREQUAL "glfw")
     target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.h" "${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp")
