@@ -1380,7 +1380,7 @@ bool ImGui::RadioButton(const char* label, bool active)
         window->DrawList->AddCircleFilled(center, radius * 0.8f, ((held && hovered) ? Spectrum::BLUE700 : hovered ? Spectrum::BLUE600 : Spectrum::BLUE500), num_segment);
         window->DrawList->AddCircleFilled(center, radius * 0.25f, Spectrum::GRAY75, num_segment);
     }
-    else 
+    else
     {
         window->DrawList->AddCircleFilled(center, radius * 0.8f, ((held && hovered) ? Spectrum::GRAY800 : hovered ? Spectrum::GRAY700: Spectrum::GRAY600), num_segment);
         window->DrawList->AddCircleFilled(center, radius * 0.6f, Spectrum::GRAY75, num_segment);
@@ -7393,7 +7393,7 @@ bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags fl
         {
             // Between 1.91.0 and 1.91.4 we made selected Selectable use an arbitrary lerp between _Header and _HeaderHovered. Removed that now. (#8106)
             ImU32 col = GetColorU32((held && highlighted) ? ImGuiCol_HeaderActive : highlighted ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
-            
+
             // Spectrum: add alpha to the color
             const ImVec4 color_vec4 = ImColor(col);
             col = ImColor(color_vec4.x, color_vec4.y, color_vec4.z, 0.15f);
@@ -7419,11 +7419,7 @@ bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags fl
 
     // Text stays at the submission position. Alignment/clipping extents ignore SpanAllColumns.
     if (is_visible)
-<<<<<<< HEAD
-        RenderTextClipped(text_min, text_max, label, NULL, &label_size, style.SelectableTextAlign, &bb, selected ? Spectrum::BLUE600 : 0U);
-=======
-        RenderTextClipped(pos, ImVec2(ImMin(pos.x + size.x, window->WorkRect.Max.x), pos.y + size.y), label, NULL, &label_size, style.SelectableTextAlign, &bb);
->>>>>>> bf75bfe
+        RenderTextClipped(pos, ImVec2(ImMin(pos.x + size.x, window->WorkRect.Max.x), pos.y + size.y), label, NULL, &label_size, style.SelectableTextAlign, &bb, selected ? Spectrum::BLUE600 : 0U);
 
     // Automatically close popups
     if (pressed && !auto_selected && (window->Flags & ImGuiWindowFlags_Popup) && !(flags & ImGuiSelectableFlags_NoAutoClosePopups) && (g.LastItemData.ItemFlags & ImGuiItemFlags_AutoClosePopups))
@@ -10591,24 +10587,13 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
         if (tab_bar->Flags & ImGuiTabBarFlags_NoCloseWithMiddleMouseButton)
             flags |= ImGuiTabItemFlags_NoCloseWithMiddleMouseButton;
 
-<<<<<<< HEAD
-    // Render tab label, process close button
-    const ImGuiID close_button_id = p_open ? GetIDWithSeed("#CLOSE", NULL, id) : 0;
-    bool just_closed;
-    bool text_clipped;
-    if (tab_contents_visible || held || hovered) PushStyleColor(ImGuiCol_Text, Spectrum::GRAY50);
-    TabItemLabelAndCloseButton(display_draw_list, bb, tab_just_unsaved ? (flags & ~ImGuiTabItemFlags_UnsavedDocument) : flags, tab_bar->FramePadding, label, id, close_button_id, tab_contents_visible, &just_closed, &text_clipped);
-    if (tab_contents_visible || held || hovered) PopStyleColor();
-    if (just_closed && p_open != NULL)
-    {
-        *p_open = false;
-        TabBarCloseTab(tab_bar, tab);
-=======
         // Render tab label, process close button
         const ImGuiID close_button_id = p_open ? GetIDWithSeed("#CLOSE", NULL, id) : 0;
         bool just_closed;
         bool text_clipped;
+        if (tab_contents_visible || held || hovered) PushStyleColor(ImGuiCol_Text, Spectrum::GRAY50);
         TabItemLabelAndCloseButton(display_draw_list, bb, tab_just_unsaved ? (flags & ~ImGuiTabItemFlags_UnsavedDocument) : flags, tab_bar->FramePadding, label, id, close_button_id, tab_contents_visible, &just_closed, &text_clipped);
+        if (tab_contents_visible || held || hovered) PopStyleColor();
         if (just_closed && p_open != NULL)
         {
             *p_open = false;
@@ -10623,7 +10608,6 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
         if (text_clipped && g.HoveredId == id && !held)
             if (!(tab_bar->Flags & ImGuiTabBarFlags_NoTooltip) && !(tab->Flags & ImGuiTabItemFlags_NoTooltip))
                 SetItemTooltip("%.*s", (int)(FindRenderedTextEnd(label) - label), label);
->>>>>>> bf75bfe
     }
 
     // Restore main window position so user can draw there
