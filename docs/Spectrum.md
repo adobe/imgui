@@ -81,9 +81,9 @@ For example, for the `docking` branch:
 
 ```
 git checkout master
-git checkout -b docking_v1.xx
+git checkout -b docking_v1.xx.x
 git merge v1.xx.x-docking
-git push --set-upstream adobe docking_v1.xx
+git push --set-upstream adobe docking_v1.xx.x
 ```
 
 1. Commit and push your changes as usual (and/or make a pull request!). 
