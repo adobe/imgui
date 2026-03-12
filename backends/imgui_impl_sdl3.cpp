@@ -20,6 +20,8 @@
 
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
+//  2025-11-05: Fixed an issue with missing characters events when an already active text field changes viewports. (#9054)
+//  2025-10-22: Fixed Platform_OpenInShellFn() return value (unused in core).
 //  2025-09-24: Skip using the SDL_GetGlobalMouseState() state when one of our window is hovered, as the SDL_EVENT_MOUSE_MOTION data is reliable. Fix macOS notch mouse coordinates issue in fullscreen mode + better perf on X11. (#7919, #7786)
 //  2025-09-18: Call platform_io.ClearPlatformHandlers() on shutdown.
 //  2025-09-15: Use SDL_GetWindowDisplayScale() on Mac to output DisplayFrameBufferScale. The function is more reliable during resolution changes e.g. going fullscreen. (#8703, #4414)
@@ -111,6 +113,8 @@ struct ImGui_ImplSDL3_Data
 
     // IME handling
     SDL_Window*             ImeWindow;
+    ImGuiPlatformImeData    ImeData;
+    bool                    ImeDirty;
 
     // Mouse handling
     Uint32                  MouseWindowID;
@@ -138,6 +142,9 @@ static ImGui_ImplSDL3_Data* ImGui_ImplSDL3_GetBackendData()
     return ImGui::GetCurrentContext() ? (ImGui_ImplSDL3_Data*)ImGui::GetIO().BackendPlatformUserData : nullptr;
 }
 
+// Forward Declarations
+static void ImGui_ImplSDL3_UpdateIme();
+
 // Functions
 static const char* ImGui_ImplSDL3_GetClipboardText(ImGuiContext*)
 {
@@ -153,16 +160,38 @@ static void ImGui_ImplSDL3_SetClipboardText(ImGuiContext*, const char* text)
     SDL_SetClipboardText(text);
 }
 
-static void ImGui_ImplSDL3_PlatformSetImeData(ImGuiContext*, ImGuiViewport* viewport, ImGuiPlatformImeData* data)
+static ImGuiViewport* ImGui_ImplSDL3_GetViewportForWindowID(SDL_WindowID window_id)
 {
     ImGui_ImplSDL3_Data* bd = ImGui_ImplSDL3_GetBackendData();
-    SDL_WindowID window_id = (SDL_WindowID)(intptr_t)viewport->PlatformHandle;
-    SDL_Window* window = SDL_GetWindowFromID(window_id);
+    return (window_id == bd->WindowID) ? ImGui::GetMainViewport() : nullptr;
+}
+
+static void ImGui_ImplSDL3_PlatformSetImeData(ImGuiContext*, ImGuiViewport*, ImGuiPlatformImeData* data)
+{
+    ImGui_ImplSDL3_Data* bd = ImGui_ImplSDL3_GetBackendData();
+    bd->ImeData = *data;
+    bd->ImeDirty = true;
+    ImGui_ImplSDL3_UpdateIme();
+}
+
+// We discard viewport passed via ImGuiPlatformImeData and always call SDL_StartTextInput() on SDL_GetKeyboardFocus().
+static void ImGui_ImplSDL3_UpdateIme()
+{
+    ImGui_ImplSDL3_Data* bd = ImGui_ImplSDL3_GetBackendData();
+    ImGuiPlatformImeData* data = &bd->ImeData;
+    SDL_Window* window = SDL_GetKeyboardFocus();
+
+    // Stop previous input
     if ((!(data->WantVisible || data->WantTextInput) || bd->ImeWindow != window) && bd->ImeWindow != nullptr)
     {
         SDL_StopTextInput(bd->ImeWindow);
         bd->ImeWindow = nullptr;
     }
+    if ((!bd->ImeDirty && bd->ImeWindow == window) || (window == NULL))
+        return;
+
+    // Start/update current input
+    bd->ImeDirty = false;
     if (data->WantVisible)
     {
         SDL_Rect r;
@@ -339,13 +368,6 @@ static void ImGui_ImplSDL3_UpdateKeyModifiers(SDL_Keymod sdl_key_mods)
     io.AddKeyEvent(ImGuiMod_Super, (sdl_key_mods & SDL_KMOD_GUI) != 0);
 }
 
-
-static ImGuiViewport* ImGui_ImplSDL3_GetViewportForWindowID(SDL_WindowID window_id)
-{
-    ImGui_ImplSDL3_Data* bd = ImGui_ImplSDL3_GetBackendData();
-    return (window_id == bd->WindowID) ? ImGui::GetMainViewport() : nullptr;
-}
-
 // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
 // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
 // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
@@ -505,7 +527,7 @@ static bool ImGui_ImplSDL3_Init(SDL_Window* window, SDL_Renderer* renderer, void
     platform_io.Platform_SetClipboardTextFn = ImGui_ImplSDL3_SetClipboardText;
     platform_io.Platform_GetClipboardTextFn = ImGui_ImplSDL3_GetClipboardText;
     platform_io.Platform_SetImeDataFn = ImGui_ImplSDL3_PlatformSetImeData;
-    platform_io.Platform_OpenInShellFn = [](ImGuiContext*, const char* url) { return SDL_OpenURL(url) == 0; };
+    platform_io.Platform_OpenInShellFn = [](ImGuiContext*, const char* url) { return SDL_OpenURL(url); };
 
     // Gamepad handling
     bd->GamepadMode = ImGui_ImplSDL3_GamepadMode_AutoFirst;
@@ -797,8 +819,8 @@ static void ImGui_ImplSDL3_GetWindowSizeAndFramebufferScale(SDL_Window* window, 
 #else
     int display_w, display_h;
     SDL_GetWindowSizeInPixels(window, &display_w, &display_h);
-    float fb_scale_x = (w > 0) ? (float)display_w / w : 1.0f;
-    float fb_scale_y = (h > 0) ? (float)display_h / h : 1.0f;
+    float fb_scale_x = (w > 0) ? (float)display_w / (float)w : 1.0f;
+    float fb_scale_y = (h > 0) ? (float)display_h / (float)h : 1.0f;
 #endif
 
     if (out_size != nullptr)
@@ -834,6 +856,7 @@ void ImGui_ImplSDL3_NewFrame()
 
     ImGui_ImplSDL3_UpdateMouseData();
     ImGui_ImplSDL3_UpdateMouseCursor();
+    ImGui_ImplSDL3_UpdateIme();
 
     // Update game controllers (if enabled and available)
     ImGui_ImplSDL3_UpdateGamepads();
