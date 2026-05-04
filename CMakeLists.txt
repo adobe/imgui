@@ -9,9 +9,9 @@ option(IMGUI_DEFINE_MATH_OPERATORS "Enable ImGui ImVec2/ImVec4 operators" OFF)
 option(IMGUI_BUILD_EXAMPLES "" OFF)
 option(IMGUI_ENABLE_STDLIB "Enable imgui_stdlib header" ON)
 set(IMGUI_BACKEND_RENDERER "opengl3" CACHE STRING "Which renderer backend to use?")
-set_property(CACHE IMGUI_BACKEND_RENDERER PROPERTY STRINGS none allegro5 dx9 dx10 dx11 dx12 metal opengl2 opengl3 sdlrenderer2 sdlrenderer3 vulkan wgpu)
+set_property(CACHE IMGUI_BACKEND_RENDERER PROPERTY STRINGS none null allegro5 dx9 dx10 dx11 dx12 metal opengl2 opengl3 sdlrenderer2 sdlrenderer3 vulkan wgpu)
 set(IMGUI_BACKEND_PLATFORM "glfw" CACHE STRING "Which platform backend to use?")
-set_property(CACHE IMGUI_BACKEND_PLATFORM PROPERTY STRINGS none allegro5 android glfw glut osx sdl2 sdl3 win32)
+set_property(CACHE IMGUI_BACKEND_PLATFORM PROPERTY STRINGS none null allegro5 android glfw glut osx sdl2 sdl3 win32)
 
 add_library(imgui
     "${imgui_SOURCE_DIR}/imgui.h"
@@ -52,6 +52,8 @@ target_compile_features(imgui PUBLIC cxx_std_11)
 # ###########
 if(IMGUI_BACKEND_RENDERER STREQUAL "none")
 # do nothing. imgui will compile without a renderer.
+elseif(IMGUI_BACKEND_RENDERER STREQUAL "null")
+    target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/imgui_impl_null.h" "${imgui_SOURCE_DIR}/backends/imgui_impl_null.cpp")
 elseif(IMGUI_BACKEND_RENDERER STREQUAL "allegro5")
     target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/backends/imgui_impl_allegro5.h" "${imgui_SOURCE_DIR}/backends/imgui_impl_allegro5.cpp")
     # untested, needs work
@@ -107,6 +109,8 @@ endif()
 
 if(IMGUI_BACKEND_PLATFORM STREQUAL "none")
     # do nothing. imgui will compile without a platform.
+elseif(IMGUI_BACKEND_RENDERER STREQUAL "null")
+    # already included by the renderer backend above
 elseif(IMGUI_BACKEND_PLATFORM STREQUAL "allegro5")
     # already included by the renderer backend above
 elseif(IMGUI_BACKEND_PLATFORM STREQUAL "android")
@@ -120,7 +124,7 @@ elseif(IMGUI_BACKEND_PLATFORM STREQUAL "glfw")
         FetchContent_Declare(
             glfw
             GIT_REPOSITORY https://github.com/glfw/glfw.git
-            GIT_TAG tags/3.3
+            GIT_TAG tags/3.4
             GIT_SHALLOW TRUE
         )
 
