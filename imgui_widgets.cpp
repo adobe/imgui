@@ -1298,7 +1298,7 @@ bool ImGui::Checkbox(const char* label, bool* v)
         // ImGui-Spectrum change: checked and unchecked state draw differently
         //RenderFrame(check_bb.Min, check_bb.Max, GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : (mixed_value || checked) ? ImGuiCol_CheckboxSelectedBg : ImGuiCol_FrameBg), true, style.FrameRounding);
         ImU32 check_col = GetColorU32(ImGuiCol_CheckMark);
-        ImU32 frame_col = (held && hovered) ? Spectrum::BLUE700 : hovered ? Spectrum::BLUE600 : Spectrum::BLUE500;
+        ImU32 frame_col = (held && hovered) ? Spectrum::Colors->BLUE700 : hovered ? Spectrum::Colors->BLUE600 : Spectrum::Colors->BLUE500;
         const ImVec2 offset(style.FramePadding.y, style.FramePadding.y);
         const ImRect check2_bb(check_bb.Min + offset, check_bb.Max - offset);
         if (mixed_value)
@@ -1317,7 +1317,7 @@ bool ImGui::Checkbox(const char* label, bool* v)
         }
         else
         {
-            ImU32 border_col = (held && hovered) ? Spectrum::GRAY800 : hovered ? Spectrum::GRAY700 : Spectrum::GRAY600;
+            ImU32 border_col = (held && hovered) ? Spectrum::Colors->GRAY800 : hovered ? Spectrum::Colors->GRAY700 : Spectrum::Colors->GRAY600;
             PushStyleVar(ImGuiStyleVar_FrameBorderSize, Spectrum::CHECKBOX_BORDER_SIZE);
             PushStyleColor(ImGuiCol_Border, border_col);
             RenderFrameBorder(check2_bb.Min, check2_bb.Max, Spectrum::CHECKBOX_ROUNDING);
@@ -1416,20 +1416,20 @@ bool ImGui::RadioButton(const char* label, bool active)
     const int num_segment = window->DrawList->_CalcCircleAutoSegmentCount(radius);
     if (active)
     {
-        window->DrawList->AddCircleFilled(center, radius * 0.8f, ((held && hovered) ? Spectrum::BLUE700 : hovered ? Spectrum::BLUE600 : Spectrum::BLUE500), num_segment);
-        window->DrawList->AddCircleFilled(center, radius * 0.25f, Spectrum::GRAY75, num_segment);
+        window->DrawList->AddCircleFilled(center, radius * 0.8f, ((held && hovered) ? Spectrum::Colors->BLUE700 : hovered ? Spectrum::Colors->BLUE600 : Spectrum::Colors->BLUE500), num_segment);
+        window->DrawList->AddCircleFilled(center, radius * 0.25f, Spectrum::Colors->GRAY75, num_segment);
     }
     else 
     {
-        window->DrawList->AddCircleFilled(center, radius * 0.8f, ((held && hovered) ? Spectrum::GRAY800 : hovered ? Spectrum::GRAY700: Spectrum::GRAY600), num_segment);
-        window->DrawList->AddCircleFilled(center, radius * 0.6f, Spectrum::GRAY75, num_segment);
+        window->DrawList->AddCircleFilled(center, radius * 0.8f, ((held && hovered) ? Spectrum::Colors->GRAY800 : hovered ? Spectrum::Colors->GRAY700: Spectrum::Colors->GRAY600), num_segment);
+        window->DrawList->AddCircleFilled(center, radius * 0.6f, Spectrum::Colors->GRAY75, num_segment);
     }
 
     ImVec2 label_pos = ImVec2(check_bb.Max.x + style.ItemInnerSpacing.x, check_bb.Min.y + style.FramePadding.y);
     if (g.LogEnabled)
         LogRenderedText(&label_pos, active ? "(x)" : "( )");
     if (label_size.x > 0.0f)
-        RenderText(label_pos, label, label_end, false, hovered ? Spectrum::GRAY900 : Spectrum::GRAY800);
+        RenderText(label_pos, label, label_end, false, hovered ? Spectrum::Colors->GRAY900 : Spectrum::Colors->GRAY800);
 
     IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags);
     return pressed;
@@ -7153,7 +7153,7 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
 
         // Label
         if (display_frame)
-            RenderTextClipped(text_pos, frame_bb.Max, label, label_end, &label_size, ImVec2(0, 0), nullptr, Spectrum::GRAY50);
+            RenderTextClipped(text_pos, frame_bb.Max, label, label_end, &label_size, ImVec2(0, 0), nullptr, Spectrum::Colors->GRAY50);
         else
             RenderText(text_pos, label, label_end, false);
 
@@ -7543,7 +7543,7 @@ bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags fl
 
     // Text stays at the submission position. Alignment/clipping extents ignore SpanAllColumns.
     if (is_visible)
-        RenderTextClipped(pos, ImVec2(ImMin(pos.x + size.x, window->WorkRect.Max.x), pos.y + size.y), label, label_end, &label_size, style.SelectableTextAlign, &bb, selected ? Spectrum::BLUE600 : 0U);
+        RenderTextClipped(pos, ImVec2(ImMin(pos.x + size.x, window->WorkRect.Max.x), pos.y + size.y), label, label_end, &label_size, style.SelectableTextAlign, &bb, selected ? Spectrum::Colors->BLUE600 : 0U);
 
 #ifdef IMGUI_DEBUG_BOXSELECT
     if (g.BoxSelectState.UnclipMode) { GetForegroundDrawList()->AddText(pos, IM_COL32(255,255,0,200), label, label_end); }
@@ -10931,7 +10931,7 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
         const ImGuiID close_button_id = p_open ? GetIDWithSeed("#CLOSE", NULL, docked_window ? docked_window->ID : id) : 0;
         bool just_closed;
         bool text_clipped;
-        if (tab_contents_visible || held || hovered) PushStyleColor(ImGuiCol_Text, Spectrum::GRAY50);
+        if (tab_contents_visible || held || hovered) PushStyleColor(ImGuiCol_Text, Spectrum::Colors->GRAY50);
         TabItemLabelAndCloseButton(display_draw_list, bb, tab_just_unsaved ? (flags & ~ImGuiTabItemFlags_UnsavedDocument) : flags, tab_bar->FramePadding, label, id, close_button_id, tab_contents_visible, &just_closed, &text_clipped);
         if (tab_contents_visible || held || hovered) PopStyleColor();
         if (just_closed && p_open != NULL)

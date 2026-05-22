@@ -12,6 +12,7 @@
 // See imgui_impl_glfw.cpp for details.
 
 #include "imgui.h"
+#include "imgui_spectrum.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl2.h"
 #include <stdio.h>
