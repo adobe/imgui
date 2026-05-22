@@ -19,6 +19,7 @@
 //   vcpkg integrate install                        ; register include and libs in Visual Studio
 
 #include "imgui.h"
+#include "imgui_spectrum.h"
 #include "imgui_impl_glut.h"
 #include "imgui_impl_opengl2.h"
 #define GL_SILENCE_DEPRECATION

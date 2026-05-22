@@ -14,60 +14,99 @@ namespace ImGui {
             io.FontDefault = font;
         }
 
-        void StyleColorsSpectrum() {
-            ImGuiStyle* style = &ImGui::GetStyle();
-            style->GrabRounding = 4.0f;
+        static const SpectrumPalette LightPalette = {
+            /* GRAY50..900 */ Color(0xFFFFFF), Color(0xFAFAFA), Color(0xF5F5F5), Color(0xEAEAEA), Color(0xE1E1E1), Color(0xCACACA), Color(0xB3B3B3), Color(0x8E8E8E), Color(0x707070), Color(0x4B4B4B), Color(0x2C2C2C),
+            /* BLUE */        Color(0x2680EB), Color(0x1473E6), Color(0x0D66D0), Color(0x095ABA),
+            /* RED */         Color(0xE34850), Color(0xD7373F), Color(0xC9252D), Color(0xBB121A),
+            /* ORANGE */      Color(0xE68619), Color(0xDA7B11), Color(0xCB6F10), Color(0xBD640D),
+            /* GREEN */       Color(0x2D9D78), Color(0x268E6C), Color(0x12805C), Color(0x107154),
+            /* INDIGO */      Color(0x6767EC), Color(0x5C5CE0), Color(0x5151D3), Color(0x4646C6),
+            /* CELERY */      Color(0x44B556), Color(0x3DA74E), Color(0x379947), Color(0x318B40),
+            /* MAGENTA */     Color(0xD83790), Color(0xCE2783), Color(0xBC1C74), Color(0xAE0E66),
+            /* YELLOW */      Color(0xDFBF00), Color(0xD2B200), Color(0xC4A600), Color(0xB79900),
+            /* FUCHSIA */     Color(0xC038CC), Color(0xB130BD), Color(0xA228AD), Color(0x93219E),
+            /* SEAFOAM */     Color(0x1B959A), Color(0x16878C), Color(0x0F797D), Color(0x096C6F),
+            /* CHARTREUSE */  Color(0x85D044), Color(0x7CC33F), Color(0x73B53A), Color(0x6AA834),
+            /* PURPLE */      Color(0x9256D9), Color(0x864CCC), Color(0x7A42BF), Color(0x6F38B1),
+        };
 
-            ImVec4* colors = style->Colors;
-            colors[ImGuiCol_Text] = ColorConvertU32ToFloat4(Spectrum::GRAY800); // text on hovered controls is gray900
-            colors[ImGuiCol_TextDisabled] = ColorConvertU32ToFloat4(Spectrum::GRAY500);
-            colors[ImGuiCol_WindowBg] = ColorConvertU32ToFloat4(Spectrum::GRAY100);
-            colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-            colors[ImGuiCol_PopupBg] = ColorConvertU32ToFloat4(Spectrum::GRAY50); // not sure about this. Note: applies to tooltips too.
-            colors[ImGuiCol_Border] = ColorConvertU32ToFloat4(Spectrum::GRAY300);
-            colors[ImGuiCol_BorderShadow] = ColorConvertU32ToFloat4(Spectrum::Static::NONE); // We don't want shadows. Ever.
-            colors[ImGuiCol_FrameBg] = ColorConvertU32ToFloat4(Spectrum::GRAY75); // this isnt right, spectrum does not do this, but it's a good fallback
-            colors[ImGuiCol_FrameBgHovered] = ColorConvertU32ToFloat4(Spectrum::GRAY50);
-            colors[ImGuiCol_FrameBgActive] = ColorConvertU32ToFloat4(Spectrum::GRAY200);
-            colors[ImGuiCol_TitleBg] = ColorConvertU32ToFloat4(Spectrum::GRAY300); // those titlebar values are totally made up, spectrum does not have this.
-            colors[ImGuiCol_TitleBgActive] = ColorConvertU32ToFloat4(Spectrum::GRAY200);
-            colors[ImGuiCol_TitleBgCollapsed] = ColorConvertU32ToFloat4(Spectrum::GRAY400);
-            colors[ImGuiCol_MenuBarBg] = ColorConvertU32ToFloat4(Spectrum::GRAY100);
-            colors[ImGuiCol_ScrollbarBg] = ColorConvertU32ToFloat4(Spectrum::GRAY100); // same as regular background
-            colors[ImGuiCol_ScrollbarGrab] = ColorConvertU32ToFloat4(Spectrum::GRAY400);
-            colors[ImGuiCol_ScrollbarGrabHovered] = ColorConvertU32ToFloat4(Spectrum::GRAY600);
-            colors[ImGuiCol_ScrollbarGrabActive] = ColorConvertU32ToFloat4(Spectrum::GRAY700);
-            colors[ImGuiCol_CheckMark] = ColorConvertU32ToFloat4(Spectrum::BLUE500);
-            colors[ImGuiCol_SliderGrab] = ColorConvertU32ToFloat4(Spectrum::GRAY700);
-            colors[ImGuiCol_SliderGrabActive] = ColorConvertU32ToFloat4(Spectrum::GRAY800);
-            colors[ImGuiCol_Button] = ColorConvertU32ToFloat4(Spectrum::GRAY75); // match default button to Spectrum's 'Action Button'.
-            colors[ImGuiCol_ButtonHovered] = ColorConvertU32ToFloat4(Spectrum::GRAY50);
-            colors[ImGuiCol_ButtonActive] = ColorConvertU32ToFloat4(Spectrum::GRAY200);
-            colors[ImGuiCol_Header] = ColorConvertU32ToFloat4(Spectrum::BLUE400);
-            colors[ImGuiCol_HeaderHovered] = ColorConvertU32ToFloat4(Spectrum::BLUE500);
-            colors[ImGuiCol_HeaderActive] = ColorConvertU32ToFloat4(Spectrum::BLUE600);
-            colors[ImGuiCol_Separator] = ColorConvertU32ToFloat4(Spectrum::GRAY400);
-            colors[ImGuiCol_SeparatorHovered] = ColorConvertU32ToFloat4(Spectrum::GRAY600);
-            colors[ImGuiCol_SeparatorActive] = ColorConvertU32ToFloat4(Spectrum::GRAY700);
-            colors[ImGuiCol_ResizeGrip] = ColorConvertU32ToFloat4(Spectrum::GRAY400);
-            colors[ImGuiCol_ResizeGripHovered] = ColorConvertU32ToFloat4(Spectrum::GRAY600);
-            colors[ImGuiCol_ResizeGripActive] = ColorConvertU32ToFloat4(Spectrum::GRAY700);
-            colors[ImGuiCol_PlotLines] = ColorConvertU32ToFloat4(Spectrum::BLUE400);
-            colors[ImGuiCol_PlotLinesHovered] = ColorConvertU32ToFloat4(Spectrum::BLUE600);
-            colors[ImGuiCol_PlotHistogram] = ColorConvertU32ToFloat4(Spectrum::BLUE400);
-            colors[ImGuiCol_PlotHistogramHovered] = ColorConvertU32ToFloat4(Spectrum::BLUE600);
-            colors[ImGuiCol_TextSelectedBg] = ColorConvertU32ToFloat4((Spectrum::BLUE400 & 0x00FFFFFF) | 0x33000000);
-            colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
-            colors[ImGuiCol_NavCursor] = ColorConvertU32ToFloat4((Spectrum::GRAY900 & 0x00FFFFFF) | 0x0A000000);
-            colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-            colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-            colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
-            colors[ImGuiCol_CheckMark] = ColorConvertU32ToFloat4(Spectrum::GRAY50);
-            colors[ImGuiCol_Tab] = ColorConvertU32ToFloat4(Spectrum::GRAY300);
-            colors[ImGuiCol_TabSelected] = ColorConvertU32ToFloat4(Spectrum::BLUE500);
-            colors[ImGuiCol_TabHovered] = ColorConvertU32ToFloat4(Spectrum::BLUE700);
-            colors[ImGuiCol_TabDimmed] = ColorConvertU32ToFloat4(Spectrum::GRAY400);
-            colors[ImGuiCol_TabDimmedSelected] = ColorConvertU32ToFloat4(Spectrum::BLUE700);
+        static const SpectrumPalette DarkPalette = {
+            /* GRAY50..900 */ Color(0x252525), Color(0x2F2F2F), Color(0x323232), Color(0x393939), Color(0x3E3E3E), Color(0x4D4D4D), Color(0x5C5C5C), Color(0x7B7B7B), Color(0x999999), Color(0xCDCDCD), Color(0xFFFFFF),
+            /* BLUE */        Color(0x2680EB), Color(0x378EF0), Color(0x4B9CF5), Color(0x5AA9FA),
+            /* RED */         Color(0xE34850), Color(0xEC5B62), Color(0xF76D74), Color(0xFF7B82),
+            /* ORANGE */      Color(0xE68619), Color(0xF29423), Color(0xF9A43F), Color(0xFFB55B),
+            /* GREEN */       Color(0x2D9D78), Color(0x33AB84), Color(0x39B990), Color(0x3FC89C),
+            /* INDIGO */      Color(0x6767EC), Color(0x7575F1), Color(0x8282F6), Color(0x9090FA),
+            /* CELERY */      Color(0x44B556), Color(0x4BC35F), Color(0x51D267), Color(0x58E06F),
+            /* MAGENTA */     Color(0xD83790), Color(0xE2499D), Color(0xEC5AAA), Color(0xF56BB7),
+            /* YELLOW */      Color(0xDFBF00), Color(0xEDCC00), Color(0xFAD900), Color(0xFFE22E),
+            /* FUCHSIA */     Color(0xC038CC), Color(0xCF3EDC), Color(0xD951E5), Color(0xE366EF),
+            /* SEAFOAM */     Color(0x1B959A), Color(0x20A3A8), Color(0x23B2B8), Color(0x26C0C7),
+            /* CHARTREUSE */  Color(0x85D044), Color(0x8EDE49), Color(0x9BEC54), Color(0xA3F858),
+            /* PURPLE */      Color(0x9256D9), Color(0x9D64E1), Color(0xA873E9), Color(0xB483F0),
+        };
+
+        const SpectrumPalette* Colors = &LightPalette;
+
+        void StyleColorsSpectrum(bool dark) {
+            Colors = dark ? &DarkPalette : &LightPalette;
+
+            ImGuiStyle* style = &ImGui::GetStyle();
+            style->WindowRounding  = 4.0f;
+            style->FrameRounding   = 4.0f;
+            style->FrameBorderSize = 1.0f;
+            style->GrabRounding    = 4.0f;
+
+            ImVec4* col = style->Colors;
+            col[ImGuiCol_Text] = ColorConvertU32ToFloat4(Colors->GRAY800); // text on hovered controls is gray900
+            col[ImGuiCol_TextDisabled] = ColorConvertU32ToFloat4(Colors->GRAY500);
+            col[ImGuiCol_WindowBg] = ColorConvertU32ToFloat4(Colors->GRAY100);
+            col[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+            col[ImGuiCol_PopupBg] = ColorConvertU32ToFloat4(Colors->GRAY50); // not sure about this. Note: applies to tooltips too.
+            col[ImGuiCol_Border] = ColorConvertU32ToFloat4(Colors->GRAY300);
+            col[ImGuiCol_BorderShadow] = ColorConvertU32ToFloat4(Spectrum::Static::NONE); // We don't want shadows. Ever.
+            col[ImGuiCol_FrameBg] = ColorConvertU32ToFloat4(Colors->GRAY75); // this isnt right, spectrum does not do this, but it's a good fallback
+            col[ImGuiCol_FrameBgHovered] = ColorConvertU32ToFloat4(Colors->GRAY50);
+            col[ImGuiCol_FrameBgActive] = ColorConvertU32ToFloat4(Colors->GRAY200);
+            col[ImGuiCol_TitleBg] = ColorConvertU32ToFloat4(Colors->GRAY300); // those titlebar values are totally made up, spectrum does not have this.
+            col[ImGuiCol_TitleBgActive] = ColorConvertU32ToFloat4(Colors->GRAY200);
+            col[ImGuiCol_TitleBgCollapsed] = ColorConvertU32ToFloat4(Colors->GRAY400);
+            col[ImGuiCol_MenuBarBg] = ColorConvertU32ToFloat4(Colors->GRAY100);
+            col[ImGuiCol_ScrollbarBg] = ColorConvertU32ToFloat4(Colors->GRAY100); // same as regular background
+            col[ImGuiCol_ScrollbarGrab] = ColorConvertU32ToFloat4(Colors->GRAY400);
+            col[ImGuiCol_ScrollbarGrabHovered] = ColorConvertU32ToFloat4(Colors->GRAY600);
+            col[ImGuiCol_ScrollbarGrabActive] = ColorConvertU32ToFloat4(Colors->GRAY700);
+            col[ImGuiCol_CheckMark] = ColorConvertU32ToFloat4(Colors->BLUE500);
+            col[ImGuiCol_SliderGrab] = ColorConvertU32ToFloat4(Colors->GRAY700);
+            col[ImGuiCol_SliderGrabActive] = ColorConvertU32ToFloat4(Colors->GRAY800);
+            col[ImGuiCol_Button] = ColorConvertU32ToFloat4(Colors->GRAY75); // match default button to Spectrum's 'Action Button'.
+            col[ImGuiCol_ButtonHovered] = ColorConvertU32ToFloat4(Colors->GRAY50);
+            col[ImGuiCol_ButtonActive] = ColorConvertU32ToFloat4(Colors->GRAY200);
+            col[ImGuiCol_Header] = ColorConvertU32ToFloat4(Colors->BLUE400);
+            col[ImGuiCol_HeaderHovered] = ColorConvertU32ToFloat4(Colors->BLUE500);
+            col[ImGuiCol_HeaderActive] = ColorConvertU32ToFloat4(Colors->BLUE600);
+            col[ImGuiCol_Separator] = ColorConvertU32ToFloat4(Colors->GRAY400);
+            col[ImGuiCol_SeparatorHovered] = ColorConvertU32ToFloat4(Colors->GRAY600);
+            col[ImGuiCol_SeparatorActive] = ColorConvertU32ToFloat4(Colors->GRAY700);
+            col[ImGuiCol_ResizeGrip] = ColorConvertU32ToFloat4(Colors->GRAY400);
+            col[ImGuiCol_ResizeGripHovered] = ColorConvertU32ToFloat4(Colors->GRAY600);
+            col[ImGuiCol_ResizeGripActive] = ColorConvertU32ToFloat4(Colors->GRAY700);
+            col[ImGuiCol_PlotLines] = ColorConvertU32ToFloat4(Colors->BLUE400);
+            col[ImGuiCol_PlotLinesHovered] = ColorConvertU32ToFloat4(Colors->BLUE600);
+            col[ImGuiCol_PlotHistogram] = ColorConvertU32ToFloat4(Colors->BLUE400);
+            col[ImGuiCol_PlotHistogramHovered] = ColorConvertU32ToFloat4(Colors->BLUE600);
+            col[ImGuiCol_TextSelectedBg] = ColorConvertU32ToFloat4((Colors->BLUE400 & 0x00FFFFFF) | 0x33000000);
+            col[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
+            col[ImGuiCol_NavCursor] = ColorConvertU32ToFloat4((Colors->GRAY900 & 0x00FFFFFF) | 0x0A000000);
+            col[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+            col[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+            col[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
+            col[ImGuiCol_CheckMark] = ColorConvertU32ToFloat4(Colors->GRAY50);
+            col[ImGuiCol_Tab] = ColorConvertU32ToFloat4(Colors->GRAY300);
+            col[ImGuiCol_TabSelected] = ColorConvertU32ToFloat4(Colors->BLUE500);
+            col[ImGuiCol_TabHovered] = ColorConvertU32ToFloat4(Colors->BLUE700);
+            col[ImGuiCol_TabDimmed] = ColorConvertU32ToFloat4(Colors->GRAY400);
+            col[ImGuiCol_TabDimmedSelected] = ColorConvertU32ToFloat4(Colors->BLUE700);
         }
 
         const unsigned int SourceSansProRegular_compressed_data[149392 / 4] =

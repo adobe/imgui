@@ -66,7 +66,6 @@ Index of this file:
 #include IMGUI_USER_CONFIG
 #endif
 #include "imconfig.h"
-#include "imgui_spectrum.h"
 
 #ifndef IMGUI_DISABLE
 

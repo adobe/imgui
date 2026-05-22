@@ -14,6 +14,7 @@
 // Read comments in imgui_impl_vulkan.h.
 
 #include "imgui.h"
+#include "imgui_spectrum.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 #include <stdio.h>          // printf, fprintf
