@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(imgui)
 
-option(IMGUI_USE_DARK_THEME "Use Dark ImGui Spectrum Theme" OFF)
 option(IMGUI_DEFINE_MATH_OPERATORS "Enable ImGui ImVec2/ImVec4 operators" OFF)
 option(IMGUI_BUILD_EXAMPLES "" OFF)
 option(IMGUI_ENABLE_STDLIB "Enable imgui_stdlib header" ON)
@@ -31,10 +30,6 @@ add_library(imgui::imgui ALIAS imgui)
 
 if(IMGUI_ENABLE_STDLIB)
     target_sources(imgui PRIVATE "${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.h" "${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp")
-endif()
-
-if(IMGUI_USE_DARK_THEME)
-    target_compile_definitions(imgui PUBLIC SPECTRUM_USE_DARK_THEME)
 endif()
 
 if(IMGUI_DEFINE_MATH_OPERATORS)
